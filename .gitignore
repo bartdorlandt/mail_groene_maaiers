@@ -131,3 +131,5 @@ dmypy.json
 
 # no credentials
 credentials.json
+client_secret_oath2.json
+token.json

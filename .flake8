@@ -1,0 +1,12 @@
+[flake8]
+ignore = F401, F403
+extend-exclude = dist,build
+# exclude = .git,__pycache__,docs/source/conf.py,old,build,dist
+show-source
+max-line-length = 120
+max-complexity = 10
+
+# per-file-ignores =
+#     # imported but unused
+#     __init__.py: F401
+
