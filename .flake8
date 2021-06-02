@@ -1,6 +1,6 @@
 [flake8]
 ignore = F401, F403
-extend-exclude = dist,build
+extend-exclude = dist,build,venv
 # exclude = .git,__pycache__,docs/source/conf.py,old,build,dist
 show-source
 max-line-length = 120
