@@ -2,17 +2,11 @@
 import sys
 import os
 
-# google sheet
-# import gspread
-# from oauth2client.service_account import ServiceAccountCredentials
-
-# google contacts
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 
-# other
 from rich import print
 from datetime import timedelta, date
 import re
@@ -105,8 +99,8 @@ def get_sheet_row_names(row, index=5):
     try:
         return row[index]
     except IndexError:
-        # todo, email bart
-        print('Names not found. row: %s' % row)
+        email_message = admin_email_message('Names information not found in sheet. row: %s' % row)
+        send_email(email_message)
 
 
 def get_next_saturday_datetime():
@@ -115,17 +109,30 @@ def get_next_saturday_datetime():
     return saturday.strftime("%d-%m")
 
 
-# def get_index_number_of_datum_col(sheet):
-#     """Adding one, because of the header"""
-#     cols = sheet.col_values(1)
-#     return cols.index(get_next_saturday_datetime()) + 1
-# def get_names_cell(sheet, index):
-#     return sheet.cell(index, 6).value
-
-
 def find_email_based_on_name_list(name, contact_dict):
-    return [contact_dict[key]['email'] for key in contact_dict.keys()
-            if key.lower().startswith(name.strip().lower())]
+    """given the contact_dict find the email address based on the name field.
+    If not found, the notes (biography) field is used.
+    """
+    email_list = []
+    name = name.lower()
+    for key in contact_dict.keys():
+        # print(contact_dict[key])
+        if key.lower().startswith(name):
+            email_list.append(contact_dict[key]['email'])
+        elif contact_dict[key].get('notes') and name in contact_dict[key].get('notes').lower():
+            # name not found in the key
+            email_list.append(contact_dict[key]['email'])
+
+    if len(email_list) == 0:
+        msg = 'Action Bart.\nName: %r not found in contacts.' % name
+    elif len(email_list) > 1:
+        msg = 'Action Bart.\nName: %r result is a non-unique entry. Found: %s' % (name, email_list)
+    else:
+        return email_list[0]
+
+    print(msg)
+    email_message = admin_email_message(msg)
+    send_email(email_message)
 
 # def find_emails():
 #     mail_string = get_names_cell()
@@ -133,37 +140,56 @@ def find_email_based_on_name_list(name, contact_dict):
 #     mail_reg = r'\S+@\S+\.\S+'
 #     match = re.findall(mail_reg, mail_string)
 #     return set(match)
+# def get_index_number_of_datum_col(sheet):
+#     """Adding one, because of the header"""
+#     cols = sheet.col_values(1)
+#     return cols.index(get_next_saturday_datetime()) + 1
+# def get_names_cell(sheet, index):
+#     return sheet.cell(index, 6).value
+# def gen_email_list(names_list, contacts):
+#     return {find_email_based_on_name_list(name, contacts) for name in names_list}
 
 
-def gen_email_list(names_list, contacts):
-    mailing_list = []
-    for name in names_list:
-        emails = find_email_based_on_name_list(name, contacts)
-        if len(emails) != 1:
-            print('Action Bart. Name: %r result is a non-unique entry. Found: %s' % (name, emails))
-        else:
-            mailing_list.extend(emails)
-    return mailing_list
+def standard_email_message(names, emails):
+    subject = "Groen onderhoud herinnering voor %s" % get_next_saturday_datetime()
+    body = f"Beste {', '.join(names)},\n\n" \
+           "Voor aanstaand weekend sta je aangemeld voor het onderhoud aan de binnentuin.\n" \
+           f"Via {config('GROEN_CONTACT')} ({config('GROEN_MOBIEL')}) kan het gereedschap " \
+           "geregeld worden.\n\n" \
+           "Mocht het onverhoopt niet door kunnen gaan, laat het de groencommissie even weten." \
+           "\n\n" \
+           "email: %s\n" % config('SMTP_USR')
+
+    # return make_mail_message(mail_from=config('SMTP_USR'), mail_to=emails,
+    return make_mail_message(mail_from=config('SMTP_USR'),
+                             mail_to=emails,
+                             subject=subject, body=body,
+                             mail_bcc=config('ADM_EMAIL'))
 
 
-def make_mail_message(mail_from, mail_to):
+def admin_email_message(body):
+    subject = "Groen email script issue"
+    return make_mail_message(mail_from=config('SMTP_USR'), mail_to=config('ADM_EMAIL'),
+                             subject=subject, body=body)
+
+
+def make_mail_message(mail_from, mail_to, subject, body='', mail_cc=None, mail_bcc=None):
     msg = EmailMessage()
-    subject = "Groen onderhoud reminder %s" % get_next_saturday_datetime()
-    # TODO make a nice body text
-    body = 'test for Bart'
-    msg.set_content(body)
-
-    msg['Subject'] = subject
     msg['From'] = mail_from
     msg['To'] = mail_to
+    if mail_cc:
+        msg['Cc'] = mail_cc
+    if mail_bcc:
+        msg['Bcc'] = mail_bcc
+    msg['Subject'] = subject
+    msg.set_content(body)
     return msg
 
 
-def send_email(receiver):
+def send_email(message):
     # Create a secure SSL context
     context = ssl.create_default_context()
     smtp_user = config('SMTP_USR')
-    message = make_mail_message(mail_from=smtp_user, mail_to=receiver)
 
     try:
         with smtplib.SMTP_SSL(config('SMTP_SRV'), config('SMTP_PORT'), context=context) as server:
@@ -183,16 +209,22 @@ def main():
     ]
     credentials_check_setup(scopes)
     credentials = set_credentials_for_api(scopes)
-    contacts = get_contact_name_email(credentials)
 
+    # Get information from the sheet first
     sheet_list = get_sheet(credentials)
     sheet_row = get_sheet_row(sheet_list=sheet_list, short_date=get_next_saturday_datetime())
     names = get_sheet_row_names(row=sheet_row)
-    names_list = names.split(',')
+    if not names:
+        return
+    names_list = [name.strip() for name in names.split(',')]
 
-    mailing_list = gen_email_list(names_list=names_list, contacts=contacts)
-    # send email to list of people
-    print(set(mailing_list))
+    # continue matching it with the contact information
+    contacts = get_contact_name_email(credentials)
+    mailing_list = {find_email_based_on_name_list(name, contacts) for name in names_list}
+    # print(mailing_list)
+    email_message = standard_email_message(names=names_list, emails=mailing_list)
+    # print(email_message)
+    send_email(email_message)
 
 
 if __name__ == '__main__':
