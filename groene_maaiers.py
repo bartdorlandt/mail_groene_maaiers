@@ -100,7 +100,7 @@ def get_sheet_row_names(row, index=5):
         return row[index]
     except IndexError:
         email_message = admin_email_message('Names information not found in sheet. row: %s' % row)
-        send_email(email_message)
+        send_email(email_message) if not no_email else print(email_message)
 
 
 def get_next_saturday_datetime():
@@ -130,9 +130,9 @@ def find_email_based_on_name_list(name, contact_dict):
     else:
         return email_list[0]
 
-    print(msg)
+    # print(msg)
     email_message = admin_email_message(msg)
-    send_email(email_message)
+    send_email(email_message) if not no_email else print(email_message)
 
 # def find_emails():
 #     mail_string = get_names_cell()
@@ -192,7 +192,8 @@ def send_email(message):
     smtp_user = config('SMTP_USR')
 
     try:
-        with smtplib.SMTP_SSL(config('SMTP_SRV'), config('SMTP_PORT'), context=context) as server:
+        with smtplib.SMTP_SSL(config('SMTP_SRV'), config('SMTP_PORT', default=465),
+                              context=context) as server:
             server.login(smtp_user, config('SMTP_PWD'))
             server.send_message(message)
     except smtplib.SMTPException:
@@ -203,6 +204,8 @@ def send_email(message):
 
 
 def main():
+    no_email = config('EMAIL_OFF', default=False)
+
     scopes = [
         "https://www.googleapis.com/auth/contacts.readonly",
         "https://www.googleapis.com/auth/spreadsheets.readonly"
@@ -224,7 +227,7 @@ def main():
     # print(mailing_list)
     email_message = standard_email_message(names=names_list, emails=mailing_list)
     # print(email_message)
-    send_email(email_message)
+    send_email(email_message) if not no_email else print(email_message)
 
 
 if __name__ == '__main__':
