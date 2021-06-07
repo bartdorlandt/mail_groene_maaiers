@@ -95,12 +95,12 @@ def get_sheet_row(sheet_list, short_date):
             return line
 
 
-def get_sheet_row_names(row, index=5):
+def get_sheet_row_names(row, index=5, email_on=False):
     try:
         return row[index]
     except IndexError:
         email_message = admin_email_message('Names information not found in sheet. row: %s' % row)
-        send_email(email_message) if not no_email else print(email_message)
+        send_email(email_message) if email_on else print(email_message)
 
 
 def get_next_saturday_datetime():
@@ -109,7 +109,7 @@ def get_next_saturday_datetime():
     return saturday.strftime("%d-%m")
 
 
-def find_email_based_on_name_list(name, contact_dict):
+def find_email_based_on_name_list(name, contact_dict, email_on=False):
     """given the contact_dict find the email address based on the name field.
     If not found, the notes (biography) field is used.
     """
@@ -132,7 +132,7 @@ def find_email_based_on_name_list(name, contact_dict):
 
     # print(msg)
     email_message = admin_email_message(msg)
-    send_email(email_message) if not no_email else print(email_message)
+    send_email(email_message) if email_on else print(email_message)
 
 # def find_emails():
 #     mail_string = get_names_cell()
@@ -204,7 +204,7 @@ def send_email(message):
 
 
 def main():
-    no_email = config('EMAIL_OFF', default=False)
+    email_on = config('EMAIL_ON', default=False, cast=bool)
 
     scopes = [
         "https://www.googleapis.com/auth/contacts.readonly",
@@ -216,18 +216,21 @@ def main():
     # Get information from the sheet first
     sheet_list = get_sheet(credentials)
     sheet_row = get_sheet_row(sheet_list=sheet_list, short_date=get_next_saturday_datetime())
-    names = get_sheet_row_names(row=sheet_row)
+    names = get_sheet_row_names(row=sheet_row, email_on=email_on)
     if not names:
         return
     names_list = [name.strip() for name in names.split(',')]
 
     # continue matching it with the contact information
     contacts = get_contact_name_email(credentials)
-    mailing_list = {find_email_based_on_name_list(name, contacts) for name in names_list}
-    # print(mailing_list)
+    mailing_list = {find_email_based_on_name_list(name, contacts, email_on=email_on)
+                    for name in names_list}
+    # clean the None entries
+    mailing_list = {mail for mail in mailing_list if mail}
+
     email_message = standard_email_message(names=names_list, emails=mailing_list)
     # print(email_message)
-    send_email(email_message) if not no_email else print(email_message)
+    send_email(email_message) if email_on else print(email_message)
 
 
 if __name__ == '__main__':
