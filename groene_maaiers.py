@@ -158,7 +158,7 @@ def standard_email_message(names, emails):
            "geregeld worden.\n\n" \
            "Mocht het onverhoopt niet door kunnen gaan, laat het de groencommissie even weten." \
            "\n\n" \
-           "email: %s\n" % config('SMTP_USR')
+           f"email: {config('SMTP_USR')}\n"
 
     # return make_mail_message(mail_from=config('SMTP_USR'), mail_to=emails,
     return make_mail_message(mail_from=config('SMTP_USR'),
