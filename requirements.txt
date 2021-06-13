@@ -3,4 +3,3 @@ google_api_python_client
 protobuf
 python-decouple
 rich
-decouple
