@@ -137,7 +137,7 @@ def find_email_based_on_name_list(name, contact_dict, email_on=False):
     email_message = admin_email_message(msg)
     if email_on:
         send_email(email_message)
-    else: 
+    else:
         print(email_message)
 
 # def find_emails():

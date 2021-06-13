@@ -11,5 +11,5 @@ reqs-force:
 	$(PIPREQS) --no-pin --force .
 
 test:
-	pytest -v test_*
 	flake8 .
+	pytest -v test_*
