@@ -24,6 +24,14 @@ contacts = {
     }
 }
 
+os.environ['SMTP_USR'] = 'testuser@domain.nl'
+os.environ['SMTP_PORT'] = '465'
+os.environ['SMTP_SRV'] = 'smtp.gmail.com'
+os.environ['SMTP_PWD'] = 'boguspassword'
+os.environ['ADM_EMAIL'] = 'admin@domain.nl'
+os.environ['GROEN_CONTACT'] = 'groencontact'
+os.environ['GROEN_MOBIEL'] = 'groenmobiel'
+os.environ['EMAIL_ON'] = 'False'
 
 def test_extract_contacts_info():
     contacts_gmail = [
