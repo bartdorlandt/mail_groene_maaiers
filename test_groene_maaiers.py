@@ -33,6 +33,7 @@ os.environ['GROEN_CONTACT'] = 'groencontact'
 os.environ['GROEN_MOBIEL'] = 'groenmobiel'
 os.environ['EMAIL_ON'] = 'False'
 
+
 def test_extract_contacts_info():
     contacts_gmail = [
         {
