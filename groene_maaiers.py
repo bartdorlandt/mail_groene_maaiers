@@ -99,8 +99,11 @@ def get_sheet_row_names(row, index=5, email_on=False):
     try:
         return row[index]
     except IndexError:
-        email_message = admin_email_message('Names information not found in sheet. row: %s' % row)
-        send_email(email_message) if email_on else print(email_message)
+        email_message = admin_email_message(f'Names information not found in sheet. row: {row}')
+        if email_on:
+            send_email(email_message)
+        else:
+            print(email_message)
 
 
 def get_next_saturday_datetime():
@@ -132,7 +135,10 @@ def find_email_based_on_name_list(name, contact_dict, email_on=False):
 
     # print(msg)
     email_message = admin_email_message(msg)
-    send_email(email_message) if email_on else print(email_message)
+    if email_on:
+        send_email(email_message)
+    else: 
+        print(email_message)
 
 # def find_emails():
 #     mail_string = get_names_cell()
@@ -230,7 +236,10 @@ def main():
 
     email_message = standard_email_message(names=names_list, emails=mailing_list)
     # print(email_message)
-    send_email(email_message) if email_on else print(email_message)
+    if email_on:
+        send_email(email_message)
+    else:
+        print(email_message)
 
 
 if __name__ == '__main__':
