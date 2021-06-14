@@ -169,23 +169,23 @@ def test_admin_email_message():
 
 def test_make_mail_message():
     base_test = {
-        'mail_from': 'from@domain.nl',
-        'mail_to': 'to@domain.nl',
-        'subject': 'subject',
+        'From': 'from@domain.nl',
+        'To': 'to@domain.nl',
+        'Subject': 'subject',
         'body': 'body'
     }
     mail_message = gm.make_mail_message(**base_test)
     mail_dict = {k: v for k, v in mail_message.items()}
 
-    assert mail_dict['From'] == base_test['mail_from']
-    assert mail_dict['To'] == base_test['mail_to']
-    assert mail_dict['Subject'] == base_test['subject']
+    assert mail_dict['From'] == base_test['From']
+    assert mail_dict['To'] == base_test['To']
+    assert mail_dict['Subject'] == base_test['Subject']
     assert mail_message.get_content().strip('\n') == base_test['body']
 
-    base_test['mail_cc'] = 'cc@domain.nl'
-    base_test['mail_bcc'] = 'bcc@domain.nl'
+    base_test['Cc'] = 'cc@domain.nl'
+    base_test['Bcc'] = 'bcc@domain.nl'
     mail_message = gm.make_mail_message(**base_test)
     mail_dict = {k: v for k, v in mail_message.items()}
 
-    assert mail_dict['Cc'] == base_test['mail_cc']
-    assert mail_dict['Bcc'] == base_test['mail_bcc']
+    assert mail_dict['Cc'] == base_test['Cc']
+    assert mail_dict['Bcc'] == base_test['Bcc']
