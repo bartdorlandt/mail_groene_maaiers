@@ -2,7 +2,7 @@
 ignore = F401, F403
 extend-exclude = .git,__pycache__,dist,build,venv
 # exclude = .git,__pycache__,docs/source/conf.py,old,build,dist
-#  show-source
+show-source = True
 max-line-length = 120
 max-complexity = 10
 
