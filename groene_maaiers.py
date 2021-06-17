@@ -17,7 +17,7 @@ from email.message import EmailMessage
 # from email.utils import parseaddr
 
 
-def credentials_check_setup(scopes, credentials_file='credentials.json', token_file='token.json'):
+def credentials_check_setup(scopes, credentials_file, token_file):
     credentials = None
     # The file token.json stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
@@ -37,7 +37,7 @@ def credentials_check_setup(scopes, credentials_file='credentials.json', token_f
             token.write(credentials.to_json())
 
 
-def set_credentials_for_api(scope, file='token.json'):
+def set_credentials_for_api(scope, file):
     return Credentials.from_authorized_user_file(file, scopes=scope)
 
 
@@ -191,12 +191,15 @@ def send_notification(message):
 
 
 def main():
+    base_path = os.path.dirname(os.path.abspath(__file__))
+    credentials_file = os.path.join(base_path, 'credentials.json')
+    token_file = os.path.join(base_path, 'token.json')
     scopes = [
         "https://www.googleapis.com/auth/contacts.readonly",
         "https://www.googleapis.com/auth/spreadsheets.readonly"
     ]
-    credentials_check_setup(scopes)
-    credentials = set_credentials_for_api(scopes)
+    credentials_check_setup(scopes=scopes, credentials_file=credentials_file, token_file=token_file)
+    credentials = set_credentials_for_api(scopes, file=token_file)
 
     # Get information from the sheet first
     sheet_list = get_sheet(credentials)
