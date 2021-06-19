@@ -212,9 +212,7 @@ def main():
     # continue matching it with the contact information
     contacts = get_contact_name_email(credentials)
     mailing_list = {find_email_based_on_name_list(name, contacts)
-                    for name in names_list}
-    # clean the None entries
-    mailing_list = {mail for mail in mailing_list if mail}
+                    for name in names_list if name}
 
     message = standard_email_message(names=names_list, emails=mailing_list)
     send_notification(message)
