@@ -19,7 +19,8 @@ contacts = {
     'Name3 LastName3': {
         'name': 'Name3 LastName3',
         'email': 'name3.lastname3@domain.nl',
-        'notes': None,
+        'notes': 'Tijdstempel: 17-1-2019 21:37:47\nMobiele telefoonnummer: 0612345678\n'
+                 'Namen bewoners: Name2 LastName2, Name4 LastName4\nBouwnummer: x\nAdres: Straat 123',
         'phone': None
     }
 }
@@ -70,7 +71,13 @@ def test_extract_contacts_info():
                 {
                     'value': 'name3.lastname3@domain.nl',
                 }
-            ]
+            ],
+            'biographies': [
+                {
+                    'value': 'Tijdstempel: 17-1-2019 21:37:47\nMobiele telefoonnummer: 0612345678\n'
+                    'Namen bewoners: Name2 LastName2, Name4 LastName4\nBouwnummer: x\nAdres: Straat 123',
+                }
+            ],
         },
     ]
     c = gm.extract_contacts_info(contacts_gmail)
@@ -123,6 +130,9 @@ def test_find_email_based_on_name_list():
     s = gm.find_email_based_on_name_list(name='Unknown', contact_dict=contacts)
     expected = None
     assert s is expected
+    s = gm.find_email_based_on_name_list(name='Name4', contact_dict=contacts)
+    expected = 'name3.lastname3@domain.nl'
+    assert s == expected
 
 
 def test_standard_email_message():
