@@ -142,19 +142,17 @@ def find_email_based_on_name_list(name, contact_dict):
 
 def standard_email_message(names, emails):
     subject = "Groen onderhoud herinnering voor %s" % get_next_saturday_datetime()
-    body = f"Beste {', '.join(names)},\n\n" \
-           "Voor aanstaand weekend sta je aangemeld voor het onderhoud aan de binnentuin.\n" \
-           f"Via {config('GROEN_CONTACT')} ({config('GROEN_MOBIEL')}) kan het gereedschap " \
-           "geregeld worden.\n\n" \
-           "Mocht het onverhoopt niet door kunnen gaan, laat het de groencommissie even weten." \
-           "\n\n" \
-           f"email: {config('SMTP_USR')}\n"
+    body = (
+        f"Beste {', '.join(names)},\n\n"
+        "Voor aanstaand weekend sta je aangemeld voor het onderhoud aan de binnentuin.\n"
+        f"Via {config('GROEN_CONTACT')} ({config('GROEN_MOBIEL')}) kan het "
+        "gereedschap geregeld worden.\n\n"
+        "Mocht het onverhoopt niet door kunnen gaan, "
+        "laat het de groencommissie even weten.\n\n"
+        f"email: {config('SMTP_USR')}\n")
 
-    # return make_mail_message(mail_from=config('SMTP_USR'), mail_to=emails,
-    return make_mail_message(From=config('SMTP_USR'),
-                             To=emails,
-                             Subject=subject, body=body,
-                             Bcc=config('ADM_EMAIL'))
+    return make_mail_message(From=config('SMTP_USR'), To=emails, Subject=subject,
+                             body=body, Bcc=config('ADM_EMAIL'))
 
 
 def admin_email_message(body):
