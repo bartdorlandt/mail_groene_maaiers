@@ -186,7 +186,7 @@ def send_email(message):
         print("Error: unable to send email")
         sys.exit(1)
 
-    print("Successfully sent email")
+    # print("Successfully sent email")
 
 
 def send_notification(message):
