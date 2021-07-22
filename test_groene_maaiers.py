@@ -150,7 +150,8 @@ def test_standard_email_message():
     body = f"Beste {', '.join(names)},\n\n" \
            "Voor aanstaand weekend sta je aangemeld voor het onderhoud aan de binnentuin.\n" \
            f"Via {groen_contact} ({groen_mobiel}) kan het gereedschap " \
-           "geregeld worden.\n\n" \
+           "geregeld worden.\n" \
+           "Stem het aub tijdig af zodat je niet voor een dichte deur staat.\n\n" \
            "Mocht het onverhoopt niet door kunnen gaan, laat het de groencommissie even weten." \
            "\n\n" \
            f"email: {smtp_usr}\n"
