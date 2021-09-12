@@ -216,8 +216,9 @@ def main():
     # continue matching it with the contact information
     contacts = get_contact_name_email(credentials)
     mailing_list = set()
-    mailing_list = {mailing_list.union(find_email_based_on_name_list(name, contacts))
-                    for name in names_list if name}
+    for name in names_list:
+        if name:
+            mailing_list = mailing_list.union(find_email_based_on_name_list(name, contacts))
 
     message = standard_email_message(names=names_list, emails=mailing_list)
     send_notification(message)
