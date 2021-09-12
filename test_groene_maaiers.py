@@ -1,4 +1,3 @@
-import pytest
 import os
 import groene_maaiers as gm
 
@@ -119,19 +118,26 @@ def test_get_sheet_row_names():
 
 def test_find_email_based_on_name_list():
     s = gm.find_email_based_on_name_list(name='Name1', contact_dict=contacts)
-    expected = 'name1.lastname1@domain.nl'
+    expected = {'name1.lastname1@domain.nl'}
     assert s == expected
     s = gm.find_email_based_on_name_list(name='Name2', contact_dict=contacts)
-    expected = 'name2.lastname2@domain.nl'
+    expected = {'name2.lastname2@domain.nl'}
     assert s == expected
     s = gm.find_email_based_on_name_list(name='Name3', contact_dict=contacts)
-    expected = 'name3.lastname3@domain.nl'
+    expected = {'name3.lastname3@domain.nl'}
     assert s == expected
     s = gm.find_email_based_on_name_list(name='Unknown', contact_dict=contacts)
     expected = None
     assert s is expected
     s = gm.find_email_based_on_name_list(name='Name4', contact_dict=contacts)
-    expected = 'name3.lastname3@domain.nl'
+    expected = {'name3.lastname3@domain.nl'}
+    assert s == expected
+    s = gm.find_email_based_on_name_list(name='Name', contact_dict=contacts)
+    expected = {
+        'name1.lastname1@domain.nl',
+        'name2.lastname2@domain.nl',
+        'name3.lastname3@domain.nl'
+    }
     assert s == expected
 
 

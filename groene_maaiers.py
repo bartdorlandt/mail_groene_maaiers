@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 import sys
 import os
 
@@ -9,7 +9,7 @@ from google.oauth2.credentials import Credentials
 
 from rich import print
 from datetime import timedelta, date
-import re
+# import re
 from decouple import config
 import smtplib
 import ssl
@@ -125,10 +125,10 @@ def find_email_based_on_name_list(name, contact_dict):
             # name not found in the key
             email_list_notes.append(contact_dict[key]['email'])
 
-    if len(email_list) == 1:
-        return email_list[0]
+    if len(email_list) > 0:
+        return set(email_list)
     elif len(email_list_notes) == 1:
-        return email_list_notes[0]
+        return set(email_list_notes)
     elif len(email_list) == 0 and len(email_list_notes) == 0:
         msg = 'Action Bart.\nName: %r not found in contacts.' % name
     elif len(email_list) > 1 or len(email_list_notes) > 1:
@@ -216,7 +216,8 @@ def main():
 
     # continue matching it with the contact information
     contacts = get_contact_name_email(credentials)
-    mailing_list = {find_email_based_on_name_list(name, contacts)
+    mailing_list = set()
+    mailing_list = {mailing_list.union(find_email_based_on_name_list(name, contacts))
                     for name in names_list if name}
 
     message = standard_email_message(names=names_list, emails=mailing_list)
