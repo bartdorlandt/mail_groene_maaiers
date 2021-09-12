@@ -121,7 +121,7 @@ def test_find_email_based_on_name_list():
     expected = {'name1.lastname1@domain.nl'}
     assert s == expected
     s = gm.find_email_based_on_name_list(name='Name2', contact_dict=contacts)
-    expected = {'name2.lastname2@domain.nl'}
+    expected = {'name2.lastname2@domain.nl', 'name3.lastname3@domain.nl'}
     assert s == expected
     s = gm.find_email_based_on_name_list(name='Name3', contact_dict=contacts)
     expected = {'name3.lastname3@domain.nl'}

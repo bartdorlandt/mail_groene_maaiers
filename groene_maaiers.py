@@ -114,25 +114,24 @@ def find_email_based_on_name_list(name, contact_dict):
     If not found, the notes (biography) field is used.
     """
     email_list = []
-    email_list_notes = []
+    # email_list_notes = []
     name = name.lower()
 
     for key in contact_dict.keys():
         # print(contact_dict[key])
         if key.lower().startswith(name):
             email_list.append(contact_dict[key]['email'])
-        elif contact_dict[key].get('notes') and name in contact_dict[key].get('notes').lower():
+
+        if contact_dict[key].get('notes') and name in contact_dict[key].get('notes').lower():
             # name not found in the key
-            email_list_notes.append(contact_dict[key]['email'])
+            email_list.append(contact_dict[key]['email'])
 
     if len(email_list) > 0:
         return set(email_list)
-    elif len(email_list_notes) == 1:
-        return set(email_list_notes)
-    elif len(email_list) == 0 and len(email_list_notes) == 0:
+    elif len(email_list) == 0:
         msg = 'Action Bart.\nName: %r not found in contacts.' % name
-    elif len(email_list) > 1 or len(email_list_notes) > 1:
-        msg = 'Action Bart.\nName: %r result is a non-unique entry. Found: %s' % (name, email_list)
+    # elif len(email_list) > 1 or len(email_list_notes) > 1:
+    #     msg = 'Action Bart.\nName: %r result is a non-unique entry. Found: %s' % (name, email_list)
     else:
         msg = 'Unsure, Name: %r Found: %s' % (name, email_list)
 
