@@ -93,6 +93,11 @@ def get_sheet_row(sheet_list, short_date):
     for line in sheet_list:
         if line[0] == short_date:
             return line
+    else:
+        # The date is not found in the sheet.
+        # message = admin_email_message(f"Date ({short_date}) not found in sheet.")
+        # send_notification(message)
+        sys.exit(1)
 
 
 def get_sheet_row_names(row, index=5):
@@ -100,6 +105,9 @@ def get_sheet_row_names(row, index=5):
         return row[index]
     except IndexError:
         message = admin_email_message(f'Names information not found in sheet. row: {row}')
+        send_notification(message)
+    except TypeError:
+        message = admin_email_message(f"TypeError:\nrow: {row}\nindex: {index}")
         send_notification(message)
 
 
