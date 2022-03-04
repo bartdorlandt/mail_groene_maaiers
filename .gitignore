@@ -110,7 +110,6 @@ ENV/
 env.bak/
 venv.bak/
 .idea
-.vscode
 
 # Spyder project settings
 .spyderproject
@@ -134,3 +133,4 @@ dmypy.json
 credentials.json
 client_secret_oath2.json
 token.json
+pytest_report.xml
