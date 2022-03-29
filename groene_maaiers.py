@@ -154,7 +154,7 @@ def standard_email_message(names, emails):
         f"Via {config('GROEN_CONTACT')} ({config('GROEN_MOBIEL')}) kan het "
         "gereedschap geregeld worden.\n"
         "Stem het aub tijdig af zodat je niet voor een dichte deur staat.\n\n"
-        "Mocht het onverhoopt niet door kunnen gaan, "
+        "Mocht het onverhoopt niet door kunnen gaan, regel even iemand anders of "
         "laat het de groencommissie even weten.\n\n"
         f"email: {config('SMTP_USR')}\n"
     )
@@ -197,8 +197,8 @@ def send_email(message):
         ) as server:
             server.login(smtp_user, config("SMTP_PWD"))
             server.send_message(message)
-    except smtplib.SMTPException:
-        print("Error: unable to send email")
+    except smtplib.SMTPException as e:
+        print(f"Error: unable to send email. error: {e}")
         sys.exit(1)
 
 
