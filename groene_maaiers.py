@@ -38,7 +38,7 @@ def set_credentials_for_api(scope, file):
 
 
 def get_contact_name_email(credentials):
-    service = build("people", "v1", credentials=credentials)
+    service = build("people", "v1", credentials=credentials, num_retries=3)
     results = (
         service.people()
         .connections()
@@ -49,7 +49,6 @@ def get_contact_name_email(credentials):
         )
         .execute()
     )
-    # personFields='names,emailAddresses').execute()
     connections = results.get("connections", [])
     return extract_contacts_info(connections)
 
@@ -84,9 +83,11 @@ def extract_contacts_info(contacts):
 def get_sheet(credentials):
     sheet_id = "1VVlJBiXnuQ_kw56RgumIyCln3yQks5RyjMGLwy3nttE"
     sheet_range = "2022!3:26"
-    service = build("sheets", "v4", credentials=credentials)
+    service = build("sheets", "v4", credentials=credentials, num_retries=3)
     sheet = service.spreadsheets()
-    result = sheet.values().get(spreadsheetId=sheet_id, range=sheet_range).execute()
+    values = sheet.values()
+    spreadsheet = values.get(spreadsheetId=sheet_id, range=sheet_range)
+    result = spreadsheet.execute()
     return result.get("values", [])
 
 
@@ -123,11 +124,9 @@ def find_email_based_on_name_list(name, contact_dict):
     If not found, the notes (biography) field is used.
     """
     email_list = []
-    # email_list_notes = []
     name = name.lower()
 
     for key in contact_dict.keys():
-        # print(contact_dict[key])
         if key.lower().startswith(name):
             email_list.append(contact_dict[key]["email"])
 
@@ -192,10 +191,12 @@ def send_email(message):
     smtp_user = config("SMTP_USR")
 
     try:
-        with smtplib.SMTP_SSL(
-            config("SMTP_SRV"), config("SMTP_PORT", default=465), context=context
-        ) as server:
+        with smtplib.SMTP(config("SMTP_SRV"), config("SMTP_PORT", default=587)) as server:
+            server.ehlo()  # Can be omitted
+            server.starttls(context=context)
+            server.ehlo()  # Can be omitted
             server.login(smtp_user, config("SMTP_PWD"))
+            # server.sendmail(message)
             server.send_message(message)
     except smtplib.SMTPException as e:
         print(f"Error: unable to send email. error: {e}")
