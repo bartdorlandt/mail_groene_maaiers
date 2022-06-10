@@ -25,6 +25,7 @@ contacts = {
 }
 
 os.environ["SMTP_USR"] = "testuser@domain.nl"
+os.environ["FROM_USR"] = "testfrom@domain.nl"
 os.environ["SMTP_PORT"] = "465"
 os.environ["SMTP_SRV"] = "smtp.gmail.com"
 os.environ["SMTP_PWD"] = "boguspassword"
