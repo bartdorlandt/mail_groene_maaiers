@@ -19,7 +19,7 @@ contacts = {
         "name": "Name3 LastName3",
         "email": "name3.lastname3@domain.nl",
         "notes": "Tijdstempel: 17-1-2019 21:37:47\nMobiele telefoonnummer: 0612345678\n"
-        "Namen bewoners: Name2 LastName2, Name4 LastName4\nBouwnummer: x\nAdres: Straat 123",
+        "Namen bewoners: Name2 LastName2, Name4 name LastName4\nBouwnummer: x\nAdres: Straat 123",
         "phone": None,
     },
 }
@@ -74,7 +74,7 @@ def test_extract_contacts_info():
             "biographies": [
                 {
                     "value": "Tijdstempel: 17-1-2019 21:37:47\nMobiele telefoonnummer: 0612345678\n"
-                    "Namen bewoners: Name2 LastName2, Name4 LastName4\n"
+                    "Namen bewoners: Name2 LastName2, Name4 name LastName4\n"
                     "Bouwnummer: x\nAdres: Straat 123",
                 }
             ],
@@ -145,8 +145,8 @@ def test_find_email_based_on_name_list():
 def test_standard_email_message():
     groen_contact = "GROEN_CONTACT"
     groen_mobiel = "GROEN_MOBIEL"
-    smtp_usr = "from@domain.nl"
-    os.environ["SMTP_USR"] = smtp_usr
+    from_usr = "from@domain.nl"
+    os.environ["FROM_USR"] = from_usr
     os.environ[groen_contact] = groen_contact
     os.environ[groen_mobiel] = groen_mobiel
     os.environ["ADM_EMAIL"] = "adm@domain.nl"
@@ -163,7 +163,7 @@ def test_standard_email_message():
         "Mocht het onverhoopt niet door kunnen gaan, regel even iemand anders of "
         "laat het de groencommissie even weten."
         "\n\n"
-        f"email: {smtp_usr}\n"
+        f"email: {from_usr}\n"
     )
     mail_message = gm.standard_email_message(names, emails)
     mail_dict = {k: v for k, v in mail_message.items()}
@@ -175,7 +175,7 @@ def test_standard_email_message():
 
 
 def test_admin_email_message():
-    os.environ["SMTP_USR"] = "from@domain.nl"
+    os.environ["FROM_USR"] = "from@domain.nl"
     os.environ["ADM_EMAIL"] = "to@domain.nl"
     subject = "Groen email script issue"
     body = "body"

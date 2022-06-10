@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+import re
 import smtplib
 import ssl
 import sys
@@ -130,8 +131,8 @@ def find_email_based_on_name_list(name, contact_dict):
         if key.lower().startswith(name):
             email_list.append(contact_dict[key]["email"])
 
-        if contact_dict[key].get("notes") and name in contact_dict[key].get("notes").lower():
-            # name not found in the key
+        r = re.compile(rf"\b{name}\b", re.IGNORECASE)
+        if contact_dict[key].get("notes") and r.search(contact_dict[key].get("notes", "")):
             email_list.append(contact_dict[key]["email"])
 
     if len(email_list) > 0:
@@ -155,11 +156,11 @@ def standard_email_message(names, emails):
         "Stem het aub tijdig af zodat je niet voor een dichte deur staat.\n\n"
         "Mocht het onverhoopt niet door kunnen gaan, regel even iemand anders of "
         "laat het de groencommissie even weten.\n\n"
-        f"email: {config('SMTP_USR')}\n"
+        f"email: {config('FROM_USR')}\n"
     )
 
     return make_mail_message(
-        From=config("SMTP_USR"),
+        From=config("FROM_USR"),
         To=emails,
         Subject=subject,
         body=body,
@@ -170,7 +171,7 @@ def standard_email_message(names, emails):
 def admin_email_message(body):
     subject = "Groen email script issue"
     return make_mail_message(
-        From=config("SMTP_USR"), To=config("ADM_EMAIL"), Subject=subject, body=body
+        From=config("FROM_USR"), To=config("ADM_EMAIL"), Subject=subject, body=body
     )
 
 
@@ -188,15 +189,13 @@ def make_mail_message(From, To, Subject, body="", Cc="", Bcc=""):
 def send_email(message):
     # Create a secure SSL context
     context = ssl.create_default_context()
-    smtp_user = config("SMTP_USR")
 
     try:
-        with smtplib.SMTP(config("SMTP_SRV"), config("SMTP_PORT", default=587)) as server:
+        with smtplib.SMTP_SSL(
+            config("SMTP_SRV"), config("SMTP_PORT", default=465), context=context
+        ) as server:
             server.ehlo()  # Can be omitted
-            server.starttls(context=context)
-            server.ehlo()  # Can be omitted
-            server.login(smtp_user, config("SMTP_PWD"))
-            # server.sendmail(message)
+            server.login(config("SMTP_USR"), config("SMTP_PWD"))
             server.send_message(message)
     except smtplib.SMTPException as e:
         print(f"Error: unable to send email. error: {e}")
