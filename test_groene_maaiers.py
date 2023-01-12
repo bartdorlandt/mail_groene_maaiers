@@ -6,21 +6,17 @@ contacts = {
     "Name1 LastName1": {
         "name": "Name1 LastName1",
         "email": "name1.lastname1@domain.nl",
-        "notes": None,
-        "phone": None,
+        "extra": "other name",
     },
     "Name2 LastName2": {
         "name": "Name2 LastName2",
         "email": "name2.lastname2@domain.nl",
-        "notes": None,
-        "phone": None,
+        "extra": "",
     },
     "Name3 LastName3": {
         "name": "Name3 LastName3",
         "email": "name3.lastname3@domain.nl",
-        "notes": "Tijdstempel: 17-1-2019 21:37:47\nMobiele telefoonnummer: 0612345678\n"
-        "Namen bewoners: Name2 LastName2, Name4 name LastName4\nBouwnummer: x\nAdres: Straat 123",
-        "phone": None,
+        "extra": "Name2 LastName2",
     },
 }
 
@@ -37,49 +33,9 @@ os.environ["EMAIL_ON"] = "False"
 
 def test_extract_contacts_info():
     contacts_gmail = [
-        {
-            "names": [
-                {
-                    "displayName": "Name1 LastName1",
-                }
-            ],
-            "emailAddresses": [
-                {
-                    "value": "name1.lastname1@domain.nl",
-                }
-            ],
-        },
-        {
-            "names": [
-                {
-                    "displayName": "Name2 LastName2",
-                }
-            ],
-            "emailAddresses": [
-                {
-                    "value": "name2.lastname2@domain.nl",
-                }
-            ],
-        },
-        {
-            "names": [
-                {
-                    "displayName": "Name3 LastName3",
-                }
-            ],
-            "emailAddresses": [
-                {
-                    "value": "name3.lastname3@domain.nl",
-                }
-            ],
-            "biographies": [
-                {
-                    "value": "Tijdstempel: 17-1-2019 21:37:47\nMobiele telefoonnummer: 0612345678\n"
-                    "Namen bewoners: Name2 LastName2, Name4 name LastName4\n"
-                    "Bouwnummer: x\nAdres: Straat 123",
-                }
-            ],
-        },
+        ["Name1 LastName1", "name1.lastname1@domain.nl", "adres 1", "other name"],
+        ["Name2 LastName2", "name2.lastname2@domain.nl", "adres 5"],
+        ["Name3 LastName3", "name3.lastname3@domain.nl", "adres 7", "Name2 LastName2"],
     ]
     c = gm.extract_contacts_info(contacts_gmail)
     assert c == contacts
@@ -123,7 +79,7 @@ def test_find_email_based_on_name_list():
     expected = {"name1.lastname1@domain.nl"}
     assert s == expected
     s = gm.find_email_based_on_name_list(name="Name2", contact_dict=contacts)
-    expected = {"name2.lastname2@domain.nl", "name3.lastname3@domain.nl"}
+    expected = {"name2.lastname2@domain.nl"}
     assert s == expected
     s = gm.find_email_based_on_name_list(name="Name3", contact_dict=contacts)
     expected = {"name3.lastname3@domain.nl"}
@@ -131,9 +87,7 @@ def test_find_email_based_on_name_list():
     s = gm.find_email_based_on_name_list(name="Unknown", contact_dict=contacts)
     expected = None
     assert s is expected
-    s = gm.find_email_based_on_name_list(name="Name4", contact_dict=contacts)
-    expected = {"name3.lastname3@domain.nl"}
-    assert s == expected
+
     s = gm.find_email_based_on_name_list(name="Name", contact_dict=contacts)
     expected = {
         "name1.lastname1@domain.nl",
@@ -154,7 +108,7 @@ def test_standard_email_message():
 
     names = ("name1", "name2")
     emails = ("to@domain.nl", "to2@domain.nl")
-    subject = "Groen onderhoud herinnering voor %s" % gm.get_next_saturday_datetime()
+    subject = f"Groen onderhoud herinnering voor {gm.get_next_saturday_datetime()}"
     body = (
         f"Beste {', '.join(names)},\n\n"
         "Voor aanstaand weekend sta je aangemeld voor het onderhoud aan de binnentuin.\n"
@@ -167,7 +121,7 @@ def test_standard_email_message():
         f"email: {from_usr}\n"
     )
     mail_message = gm.standard_email_message(names, emails)
-    mail_dict = {k: v for k, v in mail_message.items()}
+    mail_dict = dict(mail_message.items())
 
     assert mail_dict["From"] == "from@domain.nl"
     assert mail_dict["To"] == ", ".join(emails)
@@ -181,7 +135,7 @@ def test_admin_email_message():
     subject = "Groen email script issue"
     body = "body"
     mail_message = gm.admin_email_message(body)
-    mail_dict = {k: v for k, v in mail_message.items()}
+    mail_dict = dict(mail_message.items())
 
     assert mail_dict["From"] == "from@domain.nl"
     assert mail_dict["To"] == "to@domain.nl"
@@ -197,7 +151,7 @@ def test_make_mail_message():
         "body": "body",
     }
     mail_message = gm.make_mail_message(**base_test)
-    mail_dict = {k: v for k, v in mail_message.items()}
+    mail_dict = dict(mail_message.items())
 
     assert mail_dict["From"] == base_test["From"]
     assert mail_dict["To"] == base_test["To"]
@@ -207,7 +161,7 @@ def test_make_mail_message():
     base_test["Cc"] = "cc@domain.nl"
     base_test["Bcc"] = "bcc@domain.nl"
     mail_message = gm.make_mail_message(**base_test)
-    mail_dict = {k: v for k, v in mail_message.items()}
+    mail_dict = dict(mail_message.items())
 
     assert mail_dict["Cc"] == base_test["Cc"]
     assert mail_dict["Bcc"] == base_test["Bcc"]

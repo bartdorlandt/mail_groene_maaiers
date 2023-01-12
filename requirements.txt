@@ -1,5 +1,5 @@
-google_auth_oauthlib
-google_api_python_client
-protobuf
+
+google-api-python-client
+google-auth-httplib2
 python-decouple
 rich
