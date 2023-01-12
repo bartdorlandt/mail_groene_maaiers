@@ -71,7 +71,7 @@ def test_get_sheet_row_names():
     expected = "Name6, Name7"
     assert s == expected
     s = gm.get_sheet_row_names(c)
-    assert s is None
+    assert s == ""
 
 
 def test_find_email_based_on_name_list():
