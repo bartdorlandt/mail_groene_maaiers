@@ -69,7 +69,7 @@ def get_sheet_row(sheet_list: SHEET, short_date: str) -> tuple[ROW, bool]:
     )
 
 
-def get_sheet_row_names(row: ROW, index: int = 5) -> str | None:
+def get_sheet_row_names(row: ROW, index: int = 5) -> str:
     try:
         return row[index]
     except IndexError:
@@ -77,7 +77,7 @@ def get_sheet_row_names(row: ROW, index: int = 5) -> str | None:
     except TypeError:
         message = admin_email_message(f"TypeError:\nrow: {row}\nindex: {index}")
     send_notification(message)
-    return None
+    return ""
 
 
 def get_next_saturday_datetime():
