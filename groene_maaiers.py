@@ -173,6 +173,11 @@ def send_notification(message: EmailMessage) -> None:
     send_email(message) if email_on else print(message)
 
 
+def get_names_list(names: str) -> list[str]:
+    splitted = re.split(r",| en |/", names)
+    return [name.strip() for name in splitted]
+
+
 def main() -> None:
     base_path = os.path.dirname(os.path.abspath(__file__))
     credentials_file = os.path.join(base_path, "credentials.json")
@@ -195,7 +200,7 @@ def main() -> None:
     names = get_sheet_row_names(row=sheet_row)
     if not names:
         return
-    names_list = [name.strip() for name in names.split(",")]
+    names_list = get_names_list(names)
 
     # continue matching it with the contact information
     contacts = get_contact_name_email(credentials)

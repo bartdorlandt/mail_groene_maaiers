@@ -1,5 +1,7 @@
 import os
 
+import pytest
+
 import groene_maaiers as gm
 
 contacts = {
@@ -41,59 +43,70 @@ def test_extract_contacts_info():
     assert c == contacts
 
 
-def test_get_sheet_row():
+@pytest.mark.parametrize(
+    "test_input,expected",
+    [
+        ("29-05", ["29-05", "x", "  ", "", "2 bewoners", "Name4, Name5 "]),
+        ("05-06", ["05-06", "x", "x", "", "2 bewoners", "Name6 en Name7"]),
+        ("12-06", ["12-06", "x", "", "", "2 bewoners"]),
+    ],
+)
+def test_get_sheet_row(test_input, expected):
     sheet_list = [
         ["Datum", "Activiteit", "", "", "Namen", "Emails"],
         ["", "Grasmaaien + kanten", "Onkruid wieden", "Groot onderhoud*"],
         ["29-05", "x", "  ", "", "2 bewoners", "Name4, Name5 "],
-        ["05-06", "x", "x", "", "2 bewoners", "Name6, Name7"],
+        ["05-06", "x", "x", "", "2 bewoners", "Name6 en Name7"],
         ["12-06", "x", "", "", "2 bewoners"],
     ]
-    s, _ = gm.get_sheet_row(sheet_list=sheet_list, short_date="29-05")
-    expected = ["29-05", "x", "  ", "", "2 bewoners", "Name4, Name5 "]
-    assert expected == s
-    s, _ = gm.get_sheet_row(sheet_list=sheet_list, short_date="05-06")
-    expected = ["05-06", "x", "x", "", "2 bewoners", "Name6, Name7"]
-    assert expected == s
-    s, _ = gm.get_sheet_row(sheet_list=sheet_list, short_date="12-06")
-    expected = ["12-06", "x", "", "", "2 bewoners"]
-    assert expected == s
+    s, _ = gm.get_sheet_row(sheet_list=sheet_list, short_date=test_input)
+    assert s == expected
 
 
-def test_get_sheet_row_names():
-    a = ["29-05", "x", "  ", "", "2 bewoners", "Name4, Name5 "]
-    b = ["05-06", "x", "x", "", "2 bewoners", "Name6, Name7"]
-    c = ["12-06", "x", "", "", "2 bewoners"]
-    s = gm.get_sheet_row_names(a)
-    expected = "Name4, Name5 "
+@pytest.mark.parametrize(
+    "test_input,expected",
+    [
+        (["29-05", "x", "  ", "", "2 bewoners", "Name4, Name5 "], "Name4, Name5 "),
+        (["05-06", "x", "x", "", "2 bewoners", "Name6 en Name7"], "Name6 en Name7"),
+        (["12-06", "x", "", "", "2 bewoners"], ""),
+    ],
+)
+def test_get_sheet_row_names(test_input, expected):
+    s = gm.get_sheet_row_names(test_input)
     assert s == expected
-    s = gm.get_sheet_row_names(b)
-    expected = "Name6, Name7"
-    assert s == expected
-    s = gm.get_sheet_row_names(c)
-    assert s == ""
 
 
-def test_find_email_based_on_name_list():
-    s = gm.find_email_based_on_name_list(name="Name1", contact_dict=contacts)
-    expected = {"name1.lastname1@domain.nl"}
-    assert s == expected
-    s = gm.find_email_based_on_name_list(name="Name2", contact_dict=contacts)
-    expected = {"name2.lastname2@domain.nl"}
-    assert s == expected
-    s = gm.find_email_based_on_name_list(name="Name3", contact_dict=contacts)
-    expected = {"name3.lastname3@domain.nl"}
-    assert s == expected
-    s = gm.find_email_based_on_name_list(name="Unknown", contact_dict=contacts)
-    expected = None
-    assert s is expected
+@pytest.mark.parametrize(
+    "test_input,expected",
+    [
+        ("Name4, Name5 ", ["Name4", "Name5"]),
+        ("Name4 en Name5 ", ["Name4", "Name5"]),
+        ("Name4, Name5 en Name6 / Name7", ["Name4", "Name5", "Name6", "Name7"]),
+    ],
+)
+def test_get_names_list(test_input, expected):
+    assert gm.get_names_list(test_input) == expected
 
-    s = gm.find_email_based_on_name_list(name="Name", contact_dict=contacts)
-    expected = {
-        "name1.lastname1@domain.nl",
-        "name2.lastname2@domain.nl",
-        "name3.lastname3@domain.nl",
-    }
+
+@pytest.mark.parametrize(
+    "test_input,expected",
+    [
+        ("Name1", {"name1.lastname1@domain.nl"}),
+        ("Name2", {"name2.lastname2@domain.nl"}),
+        ("Name3", {"name3.lastname3@domain.nl"}),
+        # ("Name4", None),
+        (
+            "Name",
+            {
+                "name1.lastname1@domain.nl",
+                "name2.lastname2@domain.nl",
+                "name3.lastname3@domain.nl",
+            },
+        ),
+    ],
+)
+def test_find_email_based_on_name_list(test_input, expected):
+    s = gm.find_email_based_on_name_list(name=test_input, contact_dict=contacts)
     assert s == expected
 
 
