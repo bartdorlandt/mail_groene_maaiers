@@ -14,5 +14,5 @@ test:
 	pytest
 
 fix:
-	isort .
+	ruff . --fix
 	black .

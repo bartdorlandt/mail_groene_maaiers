@@ -109,7 +109,8 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-.idea
+.idea/
+.ruff_cache
 
 # Spyder project settings
 .spyderproject
@@ -133,5 +134,4 @@ mypy_report.xml
 # no credentials
 credentials.json
 client_secret_oath2.json
-token.json
 pytest_report.xml

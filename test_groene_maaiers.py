@@ -158,23 +158,23 @@ def test_admin_email_message():
 
 def test_make_mail_message():
     base_test = {
-        "From": "from@domain.nl",
-        "To": "to@domain.nl",
-        "Subject": "subject",
+        "from_": "from@domain.nl",
+        "to": "to@domain.nl",
+        "subject": "subject",
         "body": "body",
     }
     mail_message = gm.make_mail_message(**base_test)
     mail_dict = dict(mail_message.items())
 
-    assert mail_dict["From"] == base_test["From"]
-    assert mail_dict["To"] == base_test["To"]
-    assert mail_dict["Subject"] == base_test["Subject"]
+    assert mail_dict["From"] == base_test["from_"]
+    assert mail_dict["To"] == base_test["to"]
+    assert mail_dict["Subject"] == base_test["subject"]
     assert mail_message.get_content().strip("\n") == base_test["body"]
 
-    base_test["Cc"] = "cc@domain.nl"
-    base_test["Bcc"] = "bcc@domain.nl"
+    base_test["cc"] = "cc@domain.nl"
+    base_test["bcc"] = "bcc@domain.nl"
     mail_message = gm.make_mail_message(**base_test)
     mail_dict = dict(mail_message.items())
 
-    assert mail_dict["Cc"] == base_test["Cc"]
-    assert mail_dict["Bcc"] == base_test["Bcc"]
+    assert mail_dict["Cc"] == base_test["cc"]
+    assert mail_dict["Bcc"] == base_test["bcc"]

@@ -124,30 +124,30 @@ def standard_email_message(names: list[str], emails: EMAILS) -> EmailMessage:
     )
 
     return make_mail_message(
-        From=config("FROM_USR"),
-        To=emails,
-        Subject=subject,
+        from_=config("FROM_USR"),
+        to=emails,
+        subject=subject,
         body=body,
-        Bcc=config("ADM_EMAIL"),
+        bcc=config("ADM_EMAIL"),
     )
 
 
 def admin_email_message(body: str) -> EmailMessage:
     subject = "Groen email script issue"
     return make_mail_message(
-        From=config("FROM_USR"), To=config("ADM_EMAIL"), Subject=subject, body=body
+        from_=config("FROM_USR"), to=config("ADM_EMAIL"), subject=subject, body=body
     )
 
 
 def make_mail_message(
-    From: str, To: EMAILS, Subject: str, body: str = "", Cc: str = "", Bcc: str = ""
+    from_: str, to: EMAILS, subject: str, body: str = "", cc: str = "", bcc: str = ""
 ) -> EmailMessage:
     msg = EmailMessage()
-    msg["From"] = From
-    msg["To"] = To
-    msg["Cc"] = Cc
-    msg["Bcc"] = Bcc
-    msg["Subject"] = Subject
+    msg["From"] = from_
+    msg["To"] = to
+    msg["Cc"] = cc
+    msg["Bcc"] = bcc
+    msg["Subject"] = subject
     msg.set_content(body)
     return msg
 
