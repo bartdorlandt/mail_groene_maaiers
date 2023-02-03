@@ -8,10 +8,9 @@ reqs-force:
 	$(PIPREQS) --no-pin --force .
 
 test:
-	flake8
+	ruff .
 	mypy . --junit-xml mypy_report.xml
 	black --diff --color .
-	isort . --check --diff
 	pytest
 
 fix:
