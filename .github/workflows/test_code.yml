@@ -38,10 +38,10 @@ jobs:
       - name: Syntax
         run: |
           ruff .
-#          flake8
           black --diff --color .
-#          isort . --check --diff
           mypy . --junit-xml mypy_report.xml
+#          isort . --check --diff
+#          flake8
       - name: Test with pytest
         run: |
           pytest
