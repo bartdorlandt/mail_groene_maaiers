@@ -23,7 +23,6 @@ description = "Using a Gsheet to extract names to send out reminder using email"
 authors = ["Bart Dorlandt <bart@bamweb.nl>"]
 license = "LICENSE"
 readme = "README.md"
-packages = [{include = "mail_groene_maaiers"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
