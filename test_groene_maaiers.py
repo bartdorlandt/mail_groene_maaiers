@@ -81,6 +81,8 @@ def test_get_sheet_row_names(test_input, expected):
     [
         ("Name4, Name5 ", ["Name4", "Name5"]),
         ("Name4 en Name5 ", ["Name4", "Name5"]),
+        ("Name4. Name5 ", ["Name4", "Name5"]),
+        ("Name1., Name2, Name3", ["Name1", "Name2", "Name3"]),
         ("Name4, Name5 en Name6 / Name7", ["Name4", "Name5", "Name6", "Name7"]),
     ],
 )

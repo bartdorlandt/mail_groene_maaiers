@@ -7,6 +7,12 @@ reqs:
 reqs-force:
 	$(PIPREQS) --no-pin --force .
 
+install:
+	poetry install --sync
+
+install_dev:
+	poetry install --with dev --sync
+
 test:
 	ruff .
 	mypy . --junit-xml mypy_report.xml

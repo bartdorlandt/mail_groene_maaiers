@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+"""Groene maaiers script for sending emails to enlisted users on a Gsheet."""
 import os
 import re
 import smtplib
@@ -11,7 +12,7 @@ from email.message import EmailMessage
 from apiclient import discovery
 from decouple import config
 from google.oauth2 import service_account
-from rich import print
+from rich import print as pprint
 
 CONTACTS_INFO = dict[str, dict[str, str]]
 SHEET = list[list[str]]
@@ -20,6 +21,7 @@ EMAILS = typing.Set[str]
 
 
 def get_contact_name_email(credentials) -> CONTACTS_INFO:
+    """Get contact name and email."""
     sheet_id = config("CONTACTS_SHEET_ID")
     sheet_range = f"contacts!{config('CONTACTS_SHEET_RANGE')}"
     service = discovery.build("sheets", "v4", credentials=credentials, num_retries=3)
@@ -31,6 +33,7 @@ def get_contact_name_email(credentials) -> CONTACTS_INFO:
 
 
 def extract_contacts_info(contacts: SHEET) -> CONTACTS_INFO:
+    """Extract contacts information."""
     name_mail_dict = {}
 
     for line in contacts:
@@ -40,7 +43,7 @@ def extract_contacts_info(contacts: SHEET) -> CONTACTS_INFO:
             extra_namen = ""
             name, email, _ = line
         else:
-            print(f"Could not process line: {line}")
+            pprint(f"Could not process line: {line}")
             continue
 
         name_mail_dict[name] = {
@@ -52,6 +55,7 @@ def extract_contacts_info(contacts: SHEET) -> CONTACTS_INFO:
 
 
 def get_sheet(credentials) -> SHEET:
+    """Get the desired Google sheet."""
     sheet_id = config("SCHEMA_SHEET_ID")
     sheet_range = f"{date.today().year}!{config('SCHEMA_SHEET_RANGE')}"
     service = discovery.build("sheets", "v4", credentials=credentials, num_retries=3)
@@ -63,6 +67,7 @@ def get_sheet(credentials) -> SHEET:
 
 
 def get_sheet_row(sheet_list: SHEET, short_date: str) -> tuple[ROW, bool]:
+    """Get the desired row within the sheet."""
     return next(
         ((line, True) for line in sheet_list if line[0] == short_date),
         ([""], False),
@@ -70,6 +75,7 @@ def get_sheet_row(sheet_list: SHEET, short_date: str) -> tuple[ROW, bool]:
 
 
 def get_sheet_row_names(row: ROW, index: int = 5) -> str:
+    """Get the names from the row."""
     try:
         return row[index]
     except IndexError:
@@ -81,6 +87,7 @@ def get_sheet_row_names(row: ROW, index: int = 5) -> str:
 
 
 def get_next_saturday_datetime():
+    """Get the upcoming Saturday."""
     today = date.today()
     saturday = today + timedelta((5 - today.weekday()) % 7)
     return saturday.strftime("%d-%m")
@@ -105,12 +112,13 @@ def find_email_based_on_name_list(name, contact_dict):
     if email_list:
         return set(email_list)
     else:
-        msg = "Action Bart.\nName: %r not found in contacts." % name
+        msg = f"Action Bart.\nName: {name!r} not found in contacts."
     message = admin_email_message(msg)
     send_notification(message)
 
 
 def standard_email_message(names: list[str], emails: EMAILS) -> EmailMessage:
+    """Create a standard email message."""
     subject = f"Groen onderhoud herinnering voor {get_next_saturday_datetime()}"
     body = (
         f"Beste {', '.join(names)},\n\n"
@@ -133,6 +141,7 @@ def standard_email_message(names: list[str], emails: EMAILS) -> EmailMessage:
 
 
 def admin_email_message(body: str) -> EmailMessage:
+    """Create an admin email message."""
     subject = "Groen email script issue"
     return make_mail_message(
         from_=config("FROM_USR"), to=config("ADM_EMAIL"), subject=subject, body=body
@@ -142,6 +151,7 @@ def admin_email_message(body: str) -> EmailMessage:
 def make_mail_message(
     from_: str, to: EMAILS, subject: str, body: str = "", cc: str = "", bcc: str = ""
 ) -> EmailMessage:
+    """Create the base for the email message."""
     msg = EmailMessage()
     msg["From"] = from_
     msg["To"] = to
@@ -153,6 +163,7 @@ def make_mail_message(
 
 
 def send_email(message: EmailMessage) -> None:
+    """Send the email."""
     # Create a secure SSL context
     context = ssl.create_default_context()
 
@@ -164,21 +175,24 @@ def send_email(message: EmailMessage) -> None:
             server.login(config("SMTP_USR"), config("SMTP_PWD"))
             server.send_message(message)
     except smtplib.SMTPException as e:
-        print(f"Error: unable to send email. error: {e}")
+        pprint(f"Error: unable to send email. error: {e}")
         sys.exit(1)
 
 
 def send_notification(message: EmailMessage) -> None:
+    """Send the notification, either email or print."""
     email_on = config("EMAIL_ON", default=False, cast=bool)
-    send_email(message) if email_on else print(message)
+    send_email(message) if email_on else pprint(message)
 
 
 def get_names_list(names: str) -> list[str]:
-    splitted = re.split(r",| en |/", names)
-    return [name.strip() for name in splitted]
+    """Extract the names from the string."""
+    split_names = re.split(r",| en |/|\.", names)
+    return [name.strip() for name in split_names if name]
 
 
 def main() -> None:
+    """main."""
     base_path = os.path.dirname(os.path.abspath(__file__))
     credentials_file = os.path.join(base_path, "credentials.json")
     scopes = [
