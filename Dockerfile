@@ -6,7 +6,7 @@ FROM python:${PY_VERSION}-slim
 
 RUN apt-get update && \
   apt-get upgrade -y && \
-  apt-get install curl make -y && \
+  apt-get install curl -y && \
   apt-get autoremove -y && \
   apt-get clean all && \
   rm -rf /var/lib/apt/lists/*
