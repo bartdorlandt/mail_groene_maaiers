@@ -1,11 +1,6 @@
 SHELL=/bin/bash
-PIPREQS=pipreqs
-
-reqs:
-	$(PIPREQS) --no-pin .
-
-reqs-force:
-	$(PIPREQS) --no-pin --force .
+NAME=groene_maaiers
+VERSION=latest
 
 install:
 	poetry install --sync
@@ -19,6 +14,17 @@ test:
 	black --diff --color .
 	pytest
 
+build: Dockerfile
+	docker build --tag ${NAME}:${VERSION} .
+
+clean: Dockerfile
+	docker rmi ${NAME}:${VERSION} --force
+
+rebuild: clean build
+
 fix:
 	ruff . --fix
 	black .
+
+mail:
+	docker run --rm -it -v=.:/local ${NAME}:${VERSION} sh -c 'python3 groene_maaiers.py'

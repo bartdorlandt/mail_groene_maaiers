@@ -30,8 +30,6 @@ google-api-python-client = "^2.76.0"
 google-auth-httplib2 = "^0.1.0"
 python-decouple = "^3.7"
 rich = "^13.3.1"
-pylint = "^2.16.2"
-pytest = "^7.2.1"
 
 [tool.poetry.group.dev]
 optional = true
