@@ -51,4 +51,4 @@ jobs:
         run: poetry install --no-interaction --no-root --with dev -vvv
       - name: Test
         run: |
-          poetry run ./run test
+          poetry run bash run test
