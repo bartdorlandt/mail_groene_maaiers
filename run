@@ -41,8 +41,8 @@ function test {
 }
 
 function fix {
-	_echo_run "ruff . --fix"
 	_echo_run "black ."
+	_echo_run "ruff . --fix"
 }
 
 function build {

@@ -14,13 +14,13 @@ from decouple import config
 from google.oauth2 import service_account
 from rich import print as pprint
 
-CONTACTS_INFO = dict[str, dict[str, str]]
+ContactsInfo = dict[str, dict[str, str]]
 SHEET = list[list[str]]
 ROW = list[str]
 EMAILS = typing.Set[str]
 
 
-def get_contact_name_email(credentials) -> CONTACTS_INFO:
+def get_contact_name_email(credentials) -> ContactsInfo:
     """Get contact name and email."""
     sheet_id = config("CONTACTS_SHEET_ID")
     sheet_range = f"contacts!{config('CONTACTS_SHEET_RANGE')}"
@@ -32,7 +32,7 @@ def get_contact_name_email(credentials) -> CONTACTS_INFO:
     return extract_contacts_info(result.get("values", []))
 
 
-def extract_contacts_info(contacts: SHEET) -> CONTACTS_INFO:
+def extract_contacts_info(contacts: SHEET) -> ContactsInfo:
     """Extract contacts information."""
     name_mail_dict = {}
 
@@ -105,16 +105,17 @@ def find_email_based_on_name_list(name, contact_dict):
 
     if not email_list:
         for key in contact_dict.keys():
-            r = re.compile(rf"\b{name}\b", re.IGNORECASE)
-            if contact_dict[key].get("extra") and r.search(contact_dict[key].get("extra", "")):
+            regex = re.compile(rf"\b{name}\b", re.IGNORECASE)
+            if contact_dict[key].get("extra") and regex.search(contact_dict[key].get("extra", "")):
                 email_list.append(contact_dict[key]["email"])
 
     if email_list:
         return set(email_list)
-    else:
-        msg = f"Action Bart.\nName: {name!r} not found in contacts."
+
+    msg = f"Action Bart.\nName: {name!r} not found in contacts."
     message = admin_email_message(msg)
     send_notification(message)
+    return {}
 
 
 def standard_email_message(names: list[str], emails: EMAILS) -> EmailMessage:
@@ -128,15 +129,16 @@ def standard_email_message(names: list[str], emails: EMAILS) -> EmailMessage:
         "Stem het aub tijdig af zodat je niet voor een dichte deur staat.\n\n"
         "Mocht het onverhoopt niet door kunnen gaan, regel even iemand anders of "
         "laat het de groencommissie even weten.\n\n"
-        f"email: {config('FROM_USR')}\n"
+        f"Stuur een antwoord naar email: {config('REPLY_TO')}\n"
     )
 
     return make_mail_message(
-        from_=config("FROM_USR"),
-        to=emails,
+        mail_from=config("SMTP_USR"),
+        mail_to=emails,
         subject=subject,
         body=body,
         bcc=config("ADM_EMAIL"),
+        reply_to=config("REPLY_TO"),
     )
 
 
@@ -144,17 +146,28 @@ def admin_email_message(body: str) -> EmailMessage:
     """Create an admin email message."""
     subject = "Groen email script issue"
     return make_mail_message(
-        from_=config("FROM_USR"), to=config("ADM_EMAIL"), subject=subject, body=body
+        mail_from=config("SMTP_USR"),
+        mail_to=config("ADM_EMAIL"),
+        subject=subject,
+        body=body,
+        reply_to=config("REPLY_TO"),
     )
 
 
 def make_mail_message(
-    from_: str, to: EMAILS, subject: str, body: str = "", cc: str = "", bcc: str = ""
+    mail_from: str,
+    mail_to: EMAILS,
+    subject: str,
+    body: str = "",
+    cc: str = "",
+    bcc: str = "",
+    reply_to: str = "",
 ) -> EmailMessage:
     """Create the base for the email message."""
     msg = EmailMessage()
-    msg["From"] = from_
-    msg["To"] = to
+    msg["From"] = mail_from
+    msg["Reply-to"] = reply_to
+    msg["To"] = mail_to
     msg["Cc"] = cc
     msg["Bcc"] = bcc
     msg["Subject"] = subject
@@ -174,8 +187,8 @@ def send_email(message: EmailMessage) -> None:
             server.ehlo()  # Can be omitted
             server.login(config("SMTP_USR"), config("SMTP_PWD"))
             server.send_message(message)
-    except smtplib.SMTPException as e:
-        pprint(f"Error: unable to send email. error: {e}")
+    except smtplib.SMTPException as err:
+        pprint(f"Error: unable to send email. error: {err}")
         sys.exit(1)
 
 
