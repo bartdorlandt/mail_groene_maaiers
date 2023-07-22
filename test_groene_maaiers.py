@@ -163,26 +163,22 @@ def test_admin_email_message():
 
 def test_make_mail_message():
     base_test = {
-        "mail_from": os.environ["SMTP_USR"],
         "mail_to": "to@domain.nl",
         "subject": "subject",
         "body": "body",
-        "reply_to": os.environ["REPLY_TO"],
     }
     mail_message = gm.make_mail_message(**base_test)
     mail_dict = dict(mail_message.items())
 
-    assert mail_dict["From"] == base_test["mail_from"]
+    assert mail_dict["From"] == os.environ["SMTP_USR"]
     assert mail_dict["To"] == base_test["mail_to"]
     assert mail_dict["Subject"] == base_test["subject"]
     assert mail_dict["Reply-to"] == os.environ["REPLY_TO"]
     assert mail_message.get_content().strip("\n") == base_test["body"]
 
-    base_test["cc"] = "cc@domain.nl"
     base_test["bcc"] = "bcc@domain.nl"
     mail_message = gm.make_mail_message(**base_test)
     mail_dict = dict(mail_message.items())
 
-    assert mail_dict["Cc"] == base_test["cc"]
     assert mail_dict["Bcc"] == base_test["bcc"]
     assert mail_dict["Reply-to"] == os.environ["REPLY_TO"]

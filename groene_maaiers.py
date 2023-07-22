@@ -132,43 +132,26 @@ def standard_email_message(names: list[str], emails: EMAILS) -> EmailMessage:
         f"Stuur een antwoord naar email: {config('REPLY_TO')}\n"
     )
 
-    return make_mail_message(
-        mail_from=config("SMTP_USR"),
-        mail_to=emails,
-        subject=subject,
-        body=body,
-        bcc=config("ADM_EMAIL"),
-        reply_to=config("REPLY_TO"),
-    )
+    return make_mail_message(mail_to=emails, subject=subject, body=body, bcc=config("ADM_EMAIL"))
 
 
 def admin_email_message(body: str) -> EmailMessage:
     """Create an admin email message."""
     subject = "Groen email script issue"
-    return make_mail_message(
-        mail_from=config("SMTP_USR"),
-        mail_to=config("ADM_EMAIL"),
-        subject=subject,
-        body=body,
-        reply_to=config("REPLY_TO"),
-    )
+    return make_mail_message(mail_to=config("ADM_EMAIL"), subject=subject, body=body)
 
 
 def make_mail_message(
-    mail_from: str,
     mail_to: EMAILS,
     subject: str,
     body: str = "",
-    cc: str = "",
     bcc: str = "",
-    reply_to: str = "",
 ) -> EmailMessage:
     """Create the base for the email message."""
     msg = EmailMessage()
-    msg["From"] = mail_from
-    msg["Reply-to"] = reply_to
+    msg["From"] = config("SMTP_USR")
+    msg["Reply-to"] = config("REPLY_TO")
     msg["To"] = mail_to
-    msg["Cc"] = cc
     msg["Bcc"] = bcc
     msg["Subject"] = subject
     msg.set_content(body)
