@@ -1,26 +1,43 @@
+"""pytest groene_maaiers."""
+import json
 import os
 
 import pytest
 
 import groene_maaiers as gm
 
-contacts = {
-    "Name1 LastName1": {
-        "name": "Name1 LastName1",
-        "email": "name1.lastname1@domain.nl",
-        "extra": "other name",
-    },
-    "Name2 LastName2": {
-        "name": "Name2 LastName2",
-        "email": "name2.lastname2@domain.nl",
-        "extra": "",
-    },
-    "Name3 LastName3": {
-        "name": "Name3 LastName3",
-        "email": "name3.lastname3@domain.nl",
-        "extra": "Name2 LastName2",
-    },
-}
+
+@pytest.fixture
+def notify():
+    class Notification:
+        @staticmethod
+        def admin_message(msg):
+            pass
+
+        @staticmethod
+        def send_message():
+            pass
+
+    return Notification()
+
+
+@pytest.fixture
+def expected_contacts():
+    return {
+        "Name1 LastName1": gm.Person(
+            name="Name1 LastName1",
+            email="name1.lastname1@domain.nl",
+            extra="other name",
+        ),
+        "Name2 LastName2": gm.Person(
+            name="Name2 LastName2", email="name2.lastname2@domain.nl", extra=""
+        ),
+        "Name3 LastName3": gm.Person(
+            name="Name3 LastName3",
+            email="name3.lastname3@domain.nl",
+            extra="Name2 LastName2",
+        ),
+    }
 
 
 @pytest.fixture(autouse=True)
@@ -34,16 +51,73 @@ def set_os_environment():
     os.environ["GROEN_CONTACT"] = "groencontact"
     os.environ["GROEN_MOBIEL"] = "groenmobiel"
     os.environ["EMAIL_ON"] = "False"
+    os.environ["CONTACTS_SHEET_ID"] = "SomeContactsSheetID"
+    os.environ["CONTACTS_SHEET_RANGE"] = "2:40"
+    os.environ["SCHEMA_SHEET_ID"] = "SomeSchemaSheetID"
+    os.environ["SCHEMA_SHEET_RANGE"] = "3:27"
 
 
-def test_extract_contacts_info():
+@pytest.fixture(scope="session")
+def credentials(tmpdir_factory):
+    creds = {
+        "type": "service_account",
+        "project_id": "mail-groene-maaiers",
+        "private_key_id": "none",
+        "private_key": "none\n",
+        "client_email": "none",
+        "client_id": "none",
+        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+        "token_uri": "https://oauth2.googleapis.com/token",
+        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+        "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/"
+        "some.iam.gserviceaccount.com",
+    }
+    fp = tmpdir_factory.mktemp("data").join("creds.json")
+    fp.write(json.dumps(creds))
+    return fp.strpath
+
+
+@pytest.fixture
+def contacts(notify, credentials):
+    return gm.Contacts(credentials=credentials, notification=notify)
+
+
+@pytest.fixture()
+def schedule_sheet(notify, credentials):
+    return gm.ScheduleSheet(credentials=credentials, notification=notify)
+
+
+@pytest.fixture
+def notification_dict(set_os_environment):
+    """Return a notification dictionary based on the OS environment variables."""
+    return {
+        "SMTP_USR": os.environ["SMTP_USR"],
+        "ADM_EMAIL": os.environ["ADM_EMAIL"],
+        "EMAIL_ON": os.environ["EMAIL_ON"],
+        "SMTP_SRV": os.environ["SMTP_SRV"],
+        "SMTP_PORT": os.environ["SMTP_PORT"],
+        "SMTP_PWD": os.environ["SMTP_PWD"],
+        "REPLY_TO": os.environ["REPLY_TO"],
+    }
+
+
+@pytest.fixture
+def notification(notification_dict):
+    g = gm.EmailNotification()
+    for k, v in notification_dict.items():
+        setattr(g, k.lower(), v)
+    return g
+
+
+def test_extract_contacts_info(contacts, expected_contacts):
     contacts_gmail = [
         ["Name1 LastName1", "name1.lastname1@domain.nl", "adres 1", "other name"],
         ["Name2 LastName2", "name2.lastname2@domain.nl", "adres 5"],
         ["Name3 LastName3", "name3.lastname3@domain.nl", "adres 7", "Name2 LastName2"],
     ]
-    c = gm.extract_contacts_info(contacts_gmail)
-    assert c == contacts
+    contacts.sheet = contacts_gmail
+    contacts.get_contact_name_email()
+    assert contacts.contacts_name_email == expected_contacts
 
 
 @pytest.mark.parametrize(
@@ -54,7 +128,7 @@ def test_extract_contacts_info():
         ("12-06", ["12-06", "x", "", "", "2 bewoners"]),
     ],
 )
-def test_get_sheet_row(test_input, expected):
+def test_get_sheet_row(test_input, expected, schedule_sheet):
     sheet_list = [
         ["Datum", "Activiteit", "", "", "Namen", "Emails"],
         ["", "Grasmaaien + kanten", "Onkruid wieden", "Groot onderhoud*"],
@@ -62,7 +136,9 @@ def test_get_sheet_row(test_input, expected):
         ["05-06", "x", "x", "", "2 bewoners", "Name6 en Name7"],
         ["12-06", "x", "", "", "2 bewoners"],
     ]
-    s, _ = gm.get_sheet_row(sheet_list=sheet_list, short_date=test_input)
+    schedule_sheet.sheet = sheet_list
+    schedule_sheet.short_date = test_input
+    s, _ = schedule_sheet._get_sheet_row()
     assert s == expected
 
 
@@ -74,8 +150,8 @@ def test_get_sheet_row(test_input, expected):
         (["12-06", "x", "", "", "2 bewoners"], ""),
     ],
 )
-def test_get_sheet_row_names(test_input, expected):
-    s = gm.get_sheet_row_names(test_input)
+def test_get_sheet_row_names(test_input, expected, schedule_sheet):
+    s = schedule_sheet._get_sheet_row_names(test_input)
     assert s == expected
 
 
@@ -89,8 +165,9 @@ def test_get_sheet_row_names(test_input, expected):
         ("Name4, Name5 en Name6 / Name7", ["Name4", "Name5", "Name6", "Name7"]),
     ],
 )
-def test_get_names_list(test_input, expected):
-    assert gm.get_names_list(test_input) == expected
+def test_get_names_list(test_input, expected, schedule_sheet):
+    s = schedule_sheet._get_names_list(test_input)
+    assert s == expected
 
 
 @pytest.mark.parametrize(
@@ -99,7 +176,6 @@ def test_get_names_list(test_input, expected):
         ("Name1", {"name1.lastname1@domain.nl"}),
         ("Name2", {"name2.lastname2@domain.nl"}),
         ("Name3", {"name3.lastname3@domain.nl"}),
-        # ("Name4", None),
         (
             "Name",
             {
@@ -110,20 +186,22 @@ def test_get_names_list(test_input, expected):
         ),
     ],
 )
-def test_find_email_based_on_name_list(test_input, expected):
-    s = gm.find_email_based_on_name_list(name=test_input, contact_dict=contacts)
+def test_find_email_based_on_name_list(test_input, expected, contacts, expected_contacts):
+    # contacts.contacts_name_email = expected_contacts
+    s = contacts._find_email_based_on_name_list(name=test_input, contacts=expected_contacts)
     assert s == expected
 
 
-def test_standard_email_message():
-    groen_contact = "GROEN_CONTACT"
-    groen_mobiel = "GROEN_MOBIEL"
-    smtp_usr = "from@domain.nl"
-    os.environ["SMTP_USR"] = smtp_usr
-    os.environ[groen_contact] = groen_contact
-    os.environ[groen_mobiel] = groen_mobiel
-    os.environ["ADM_EMAIL"] = "adm@domain.nl"
+def test_notifications(notification, notification_dict):
+    # sourcery skip: no-loop-in-tests
+    for k, v in notification_dict.items():
+        g = getattr(notification, k.lower())
+        assert g == notification_dict[k]
 
+
+def test_standard_email_message(notification):
+    groen_contact = "groencontact"
+    groen_mobiel = "groenmobiel"
     names = ["name1", "name2"]
     emails = {"to@domain.nl", "to2@domain.nl"}
     subject = f"Groen onderhoud herinnering voor {gm.get_next_saturday_datetime()}"
@@ -138,47 +216,46 @@ def test_standard_email_message():
         "\n\n"
         f"Stuur een antwoord naar email: {os.environ['REPLY_TO']}\n"
     )
-    mail_message = gm.standard_email_message(names, emails)
-    mail_dict = dict(mail_message.items())
+    notification.standard_message(names, emails)
+    mail_dict = dict(notification.message.items())
 
-    assert mail_dict["From"] == smtp_usr
     assert mail_dict["To"] == ", ".join(emails)
     assert mail_dict["Subject"] == subject
-    assert mail_message.get_content() == body
+    assert notification.message.get_content() == body
 
 
-def test_admin_email_message():
-    os.environ["SMTP_USR"] = "from@domain.nl"
-    os.environ["ADM_EMAIL"] = "to@domain.nl"
+def test_admin_message(notification):
+    # os.environ["SMTP_USR"] = "from@domain.nl"
+    # os.environ["ADM_EMAIL"] = "to@domain.nl"
     subject = "Groen email script issue"
     body = "body"
-    mail_message = gm.admin_email_message(body)
-    mail_dict = dict(mail_message.items())
+    notification.admin_message(body)
+    mail_dict = dict(notification.message.items())
 
-    assert mail_dict["From"] == "from@domain.nl"
-    assert mail_dict["To"] == "to@domain.nl"
+    assert mail_dict["From"] == notification.smtp_usr
+    assert mail_dict["To"] == notification.adm_email
     assert mail_dict["Subject"] == subject
-    assert mail_message.get_content().strip("\n") == body
+    assert notification.message.get_content().strip("\n") == body
 
 
-def test_make_mail_message():
+def test_generate_message(notification):
     base_test = {
         "mail_to": "to@domain.nl",
         "subject": "subject",
         "body": "body",
     }
-    mail_message = gm.make_mail_message(**base_test)
-    mail_dict = dict(mail_message.items())
+    notification.generate_message(**base_test)
+    mail_dict = dict(notification.message.items())
 
     assert mail_dict["From"] == os.environ["SMTP_USR"]
     assert mail_dict["To"] == base_test["mail_to"]
     assert mail_dict["Subject"] == base_test["subject"]
     assert mail_dict["Reply-to"] == os.environ["REPLY_TO"]
-    assert mail_message.get_content().strip("\n") == base_test["body"]
+    assert notification.message.get_content().strip("\n") == base_test["body"]
 
     base_test["bcc"] = "bcc@domain.nl"
-    mail_message = gm.make_mail_message(**base_test)
-    mail_dict = dict(mail_message.items())
+    notification.generate_message(**base_test)
+    mail_dict = dict(notification.message.items())
 
     assert mail_dict["Bcc"] == base_test["bcc"]
     assert mail_dict["Reply-to"] == os.environ["REPLY_TO"]

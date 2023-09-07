@@ -30,6 +30,7 @@ google-api-python-client = "^2.76.0"
 google-auth-httplib2 = "^0.1.0"
 python-decouple = "^3.7"
 rich = "^13.3.1"
+black = {extras = ["d"], version = "^23.7.0"}
 
 [tool.poetry.group.dev]
 optional = true
@@ -49,8 +50,12 @@ build-backend = "poetry.core.masonry.api"
 [tool.ruff]
 line-length = 100
 target-version = "py310"
-extend-ignore = ["F401", "F403"]
-extend-exclude = [".git","__pycache__","dist","build",".venv"]
+extend-ignore = ["F401", "F403", "PLR2004", "D203", "D213", "D407", "D406"]
+extend-select = ["I", "C90", "D", "PL", "S"]
+extend-exclude = [".git","__pycache__","dist","build",".venv", "test_*"]
 
 [tool.ruff.mccabe]
 max-complexity = 10
+
+[tool.pylint]
+ignore-patterns=["^test_.*$"]
