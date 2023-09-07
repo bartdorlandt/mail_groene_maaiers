@@ -135,3 +135,5 @@ mypy_report.xml
 # no credentials
 credentials.json
 client_secret_oath2.json
+
+*.old

@@ -7,6 +7,7 @@
 .venv
 .vscode
 .idea
+*.old
 __pycache__
 coverage.xml
 *_report.xml
