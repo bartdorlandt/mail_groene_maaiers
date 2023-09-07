@@ -77,12 +77,15 @@ class EmailNotification(Notification):
     """Class to send out an email notification."""
 
     message: EmailMessage
-    email_on: bool = config("EMAIL_ON", default=False, cast=bool)
-    smtp_srv: str = config("SMTP_SRV")
-    smtp_port: int = config("SMTP_PORT", default=465, cast=int)
-    smtp_usr: str = config("SMTP_USR")
-    smtp_pwd: str = config("SMTP_PWD")
-    reply_to: str = config("REPLY_TO")
+
+    def __init__(self) -> None:
+        """Init EmailNotification."""
+        self.email_on: bool = config("EMAIL_ON", default=False, cast=bool)
+        self.smtp_srv: str = config("SMTP_SRV")
+        self.smtp_port: int = config("SMTP_PORT", default=465, cast=int)
+        self.smtp_usr: str = config("SMTP_USR")
+        self.smtp_pwd: str = config("SMTP_PWD")
+        self.reply_to: str = config("REPLY_TO")
 
     def send_message(self) -> None:
         """Send the email."""
