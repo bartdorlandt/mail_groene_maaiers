@@ -35,7 +35,7 @@ def expected_contacts():
         "Name3 LastName3": gm.Person(
             name="Name3 LastName3",
             email="name3.lastname3@domain.nl",
-            extra="Name2 LastName2",
+            extra="Name4 LastName4",
         ),
     }
 
@@ -113,7 +113,7 @@ def test_extract_contacts_info(contacts, expected_contacts):
     contacts_gmail = [
         ["Name1 LastName1", "name1.lastname1@domain.nl", "adres 1", "other name"],
         ["Name2 LastName2", "name2.lastname2@domain.nl", "adres 5"],
-        ["Name3 LastName3", "name3.lastname3@domain.nl", "adres 7", "Name2 LastName2"],
+        ["Name3 LastName3", "name3.lastname3@domain.nl", "adres 7", "Name4 LastName4"],
     ]
     contacts.sheet = contacts_gmail
     contacts.get_contact_name_email()
@@ -176,6 +176,7 @@ def test_get_names_list(test_input, expected, schedule_sheet):
         ("Name1", {"name1.lastname1@domain.nl"}),
         ("Name2", {"name2.lastname2@domain.nl"}),
         ("Name3", {"name3.lastname3@domain.nl"}),
+        ("Name4", {"name3.lastname3@domain.nl"}),
         (
             "Name",
             {

@@ -258,15 +258,15 @@ class Contacts(GSheet):
         email_list = [data.email for key, data in contacts.items() if key.lower().startswith(name)]
 
         if not email_list:
+            regex = re.compile(pattern=rf"\b{name}\b", flags=re.IGNORECASE)
             for data in contacts.values():
-                regex = re.compile(pattern=r"\b{name}\b", flags=re.IGNORECASE)
                 if data.extra and regex.search(data.extra):
                     email_list.append(data.email)
 
         if email_list:
             return set(email_list)
 
-        msg = f"Action Bart.\nName: {name!r} not found in contacts."
+        msg = f"Action required.\nName: {name!r} not found in contacts."
         self.notification.admin_message(msg)
         self.notification.send_message()
         return set()
