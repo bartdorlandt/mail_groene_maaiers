@@ -4,6 +4,7 @@ import os
 import re
 import smtplib
 import ssl
+import typing
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import date, timedelta
@@ -29,11 +30,11 @@ class Person:
     extra: str = ""
 
 
-PersonInfo = dict[str, Person]
-SHEET = list[list[str]]
-ROW = list[str]
-EMAILS = set[str]
-ERR = str
+PersonInfo: typing.TypeAlias = dict[str, Person]
+Sheet: typing.TypeAlias = list[list[str]]
+Row: typing.TypeAlias = list[str]
+Emails: typing.TypeAlias = set[str]
+Err: typing.TypeAlias = str
 
 
 def get_next_saturday_datetime() -> str:
@@ -61,7 +62,7 @@ class Notification(ABC):
     @abstractmethod
     def generate_message(
         self,
-        mail_to: EMAILS,
+        mail_to: Emails,
         subject: str,
         body: str,
         bcc: str,
@@ -69,7 +70,7 @@ class Notification(ABC):
         """Generate the message."""
 
     @abstractmethod
-    def standard_message(self, names: list[str], emails: EMAILS) -> None:
+    def standard_message(self, names: list[str], emails: Emails) -> None:
         """Generate a standard message."""
 
 
@@ -116,7 +117,7 @@ class EmailNotification(Notification):
 
     def generate_message(
         self,
-        mail_to: EMAILS,
+        mail_to: Emails,
         subject: str,
         body: str,
         bcc: str = "",
@@ -138,7 +139,7 @@ class EmailNotification(Notification):
         msg.set_content(body)
         self.message = msg
 
-    def standard_message(self, names: list[str], emails: EMAILS) -> None:
+    def standard_message(self, names: list[str], emails: Emails) -> None:
         """Create a standard email message.
 
         Args:
@@ -162,7 +163,7 @@ class EmailNotification(Notification):
 class GSheet:  # pylint: disable=too-few-public-methods
     """Defining the superclass to extract data from a Google Sheet."""
 
-    sheet: SHEET
+    sheet: Sheet
     notification: Notification
     sheet_id: str
     sheet_range: str
@@ -203,7 +204,7 @@ class Contacts(GSheet):
             notification (Notification): Notification type class
         """
         self.contacts_name_email: PersonInfo = {}
-        self.mailing_list: EMAILS = set()
+        self.mailing_list: Emails = set()
         self.sheet_id = config("CONTACTS_SHEET_ID")
         self.sheet_range = f"contacts!{config('CONTACTS_SHEET_RANGE')}"
         super().__init__(credentials, notification)
@@ -225,7 +226,7 @@ class Contacts(GSheet):
             name_mail_dict[name] = Person(name=name, email=email, extra=extra_namen)
         self.contacts_name_email = name_mail_dict
 
-    def generate_mailing_list(self, names: list[str]) -> EMAILS:
+    def generate_mailing_list(self, names: list[str]) -> Emails:
         """Generate the mailing list using the contact data.
 
         Args:
@@ -241,7 +242,7 @@ class Contacts(GSheet):
                 )
         return self.mailing_list
 
-    def _find_email_based_on_name_list(self, name: str, contacts: PersonInfo) -> EMAILS:
+    def _find_email_based_on_name_list(self, name: str, contacts: PersonInfo) -> Emails:
         """Given the contact_dict find the email address based on the name field.
 
         If not found, the 'extra' field is used.
@@ -287,7 +288,7 @@ class ScheduleSheet(GSheet):
         self.short_date = get_next_saturday_datetime()
         super().__init__(credentials, notification)
 
-    def _get_sheet_row(self) -> tuple[ROW, bool]:
+    def _get_sheet_row(self) -> tuple[Row, bool]:
         """Get the desired row within the sheet.
 
         Returns:
@@ -298,7 +299,7 @@ class ScheduleSheet(GSheet):
             ([""], False),
         )
 
-    def _get_sheet_row_names(self, row: ROW) -> str:
+    def _get_sheet_row_names(self, row: Row) -> str:
         """Get the names from the row.
 
         Args:
@@ -330,7 +331,7 @@ class ScheduleSheet(GSheet):
         split_names = re.split(pattern=r",| en |/|\.", string=names)
         return [name.strip() for name in split_names if name]
 
-    def names_next_date(self) -> tuple[list[str], ERR]:
+    def names_next_date(self) -> tuple[list[str], Err]:
         """Extract the names for the upcoming date.
 
         Returns:

@@ -22,7 +22,7 @@ def notify():
 
 
 @pytest.fixture
-def expected_contacts():
+def expected_contacts() -> dict[str, gm.Person]:
     return {
         "Name1 LastName1": gm.Person(
             name="Name1 LastName1",
@@ -41,7 +41,7 @@ def expected_contacts():
 
 
 @pytest.fixture(autouse=True)
-def set_os_environment():
+def set_os_environment() -> None:
     os.environ["SMTP_USR"] = "testuser@domain.nl"
     os.environ["REPLY_TO"] = "testfrom@domain.nl"
     os.environ["SMTP_PORT"] = "465"
@@ -58,7 +58,7 @@ def set_os_environment():
 
 
 @pytest.fixture(scope="session")
-def credentials(tmpdir_factory):
+def credentials(tmpdir_factory) -> str:
     creds = {
         "type": "service_account",
         "project_id": "mail-groene-maaiers",
@@ -78,17 +78,17 @@ def credentials(tmpdir_factory):
 
 
 @pytest.fixture
-def contacts(notify, credentials):
+def contacts(notify: gm.Notification, credentials: gm.Credentials):
     return gm.Contacts(credentials=credentials, notification=notify)
 
 
 @pytest.fixture()
-def schedule_sheet(notify, credentials):
+def schedule_sheet(notify: gm.Notification, credentials: gm.Credentials):
     return gm.ScheduleSheet(credentials=credentials, notification=notify)
 
 
 @pytest.fixture
-def notification_dict(set_os_environment):
+def notification_dict(set_os_environment) -> dict[str, str]:
     """Return a notification dictionary based on the OS environment variables."""
     return {
         "SMTP_USR": os.environ["SMTP_USR"],
@@ -102,14 +102,14 @@ def notification_dict(set_os_environment):
 
 
 @pytest.fixture
-def notification(notification_dict):
+def notification(notification_dict: dict[str, str]) -> gm.EmailNotification:
     g = gm.EmailNotification()
     for k, v in notification_dict.items():
         setattr(g, k.lower(), v)
     return g
 
 
-def test_extract_contacts_info(contacts, expected_contacts):
+def test_extract_contacts_info(contacts: gm.Contacts, expected_contacts: dict[str, gm.Person]):
     contacts_gmail = [
         ["Name1 LastName1", "name1.lastname1@domain.nl", "adres 1", "other name"],
         ["Name2 LastName2", "name2.lastname2@domain.nl", "adres 5"],
@@ -128,7 +128,7 @@ def test_extract_contacts_info(contacts, expected_contacts):
         ("12-06", ["12-06", "x", "", "", "2 bewoners"]),
     ],
 )
-def test_get_sheet_row(test_input, expected, schedule_sheet):
+def test_get_sheet_row(test_input: str, expected: list[str], schedule_sheet: gm.ScheduleSheet):
     sheet_list = [
         ["Datum", "Activiteit", "", "", "Namen", "Emails"],
         ["", "Grasmaaien + kanten", "Onkruid wieden", "Groot onderhoud*"],
@@ -150,7 +150,9 @@ def test_get_sheet_row(test_input, expected, schedule_sheet):
         (["12-06", "x", "", "", "2 bewoners"], ""),
     ],
 )
-def test_get_sheet_row_names(test_input, expected, schedule_sheet):
+def test_get_sheet_row_names(
+    test_input: list[str], expected: str, schedule_sheet: gm.ScheduleSheet
+):
     s = schedule_sheet._get_sheet_row_names(test_input)
     assert s == expected
 
@@ -165,7 +167,7 @@ def test_get_sheet_row_names(test_input, expected, schedule_sheet):
         ("Name4, Name5 en Name6 / Name7", ["Name4", "Name5", "Name6", "Name7"]),
     ],
 )
-def test_get_names_list(test_input, expected, schedule_sheet):
+def test_get_names_list(test_input: str, expected: list[str], schedule_sheet: gm.ScheduleSheet):
     s = schedule_sheet._get_names_list(test_input)
     assert s == expected
 
@@ -187,20 +189,25 @@ def test_get_names_list(test_input, expected, schedule_sheet):
         ),
     ],
 )
-def test_find_email_based_on_name_list(test_input, expected, contacts, expected_contacts):
+def test_find_email_based_on_name_list(
+    test_input: str,
+    expected: set[str],
+    contacts: gm.Contacts,
+    expected_contacts: dict[str, gm.Person],
+):
     # contacts.contacts_name_email = expected_contacts
     s = contacts._find_email_based_on_name_list(name=test_input, contacts=expected_contacts)
     assert s == expected
 
 
-def test_notifications(notification, notification_dict):
+def test_notifications(notification: gm.Notification, notification_dict: dict[str, str]):
     # sourcery skip: no-loop-in-tests
-    for k, v in notification_dict.items():
+    for k in notification_dict:
         g = getattr(notification, k.lower())
         assert g == notification_dict[k]
 
 
-def test_standard_email_message(notification):
+def test_standard_email_message(notification: gm.EmailNotification):
     groen_contact = "groencontact"
     groen_mobiel = "groenmobiel"
     names = ["name1", "name2"]
@@ -225,38 +232,35 @@ def test_standard_email_message(notification):
     assert notification.message.get_content() == body
 
 
-def test_admin_message(notification):
-    # os.environ["SMTP_USR"] = "from@domain.nl"
-    # os.environ["ADM_EMAIL"] = "to@domain.nl"
+def test_admin_message(notification: gm.EmailNotification):
     subject = "Groen email script issue"
     body = "body"
     notification.admin_message(body)
     mail_dict = dict(notification.message.items())
 
     assert mail_dict["From"] == notification.smtp_usr
-    assert mail_dict["To"] == notification.adm_email
+    assert mail_dict["To"] == notification.message["To"]
     assert mail_dict["Subject"] == subject
     assert notification.message.get_content().strip("\n") == body
 
 
-def test_generate_message(notification):
-    base_test = {
-        "mail_to": "to@domain.nl",
-        "subject": "subject",
-        "body": "body",
-    }
-    notification.generate_message(**base_test)
+def test_generate_message(notification: gm.EmailNotification):
+    mail = "to@domain.nl"
+    mail_to = {mail}
+    subject = "subject"
+    body = "body"
+    notification.generate_message(mail_to=mail_to, subject=subject, body=body)
     mail_dict = dict(notification.message.items())
 
     assert mail_dict["From"] == os.environ["SMTP_USR"]
-    assert mail_dict["To"] == base_test["mail_to"]
-    assert mail_dict["Subject"] == base_test["subject"]
+    assert mail_dict["To"] == mail
+    assert mail_dict["Subject"] == subject
     assert mail_dict["Reply-to"] == os.environ["REPLY_TO"]
-    assert notification.message.get_content().strip("\n") == base_test["body"]
+    assert notification.message.get_content().strip("\n") == body
 
-    base_test["bcc"] = "bcc@domain.nl"
-    notification.generate_message(**base_test)
+    bcc = "bcc@domain.nl"
+    notification.generate_message(mail_to=mail_to, subject=subject, body=body, bcc=bcc)
     mail_dict = dict(notification.message.items())
 
-    assert mail_dict["Bcc"] == base_test["bcc"]
+    assert mail_dict["Bcc"] == bcc
     assert mail_dict["Reply-to"] == os.environ["REPLY_TO"]

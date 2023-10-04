@@ -28,21 +28,28 @@ function _echo_run {
   $(echo "$1")
 }
 
+function _poetry {
+  echo "poetry run $1"
+  # shellcheck disable=SC2091
+  # shellcheck disable=SC2116
+  $(echo "poetry run $1")
+}
+
 # -----------------------------------------------------------------------------
 function install:dev {
    _echo_run "poetry install --with dev --sync"
 }
 
 function test {
-	_echo_run "ruff ."
-	_echo_run "mypy . --junit-xml mypy_report.xml"
-	_echo_run "black --diff --color ."
-	_echo_run "pytest"
+	_poetry "ruff ."
+	_poetry "mypy . --junit-xml mypy_report.xml"
+	_poetry "black --diff --color ."
+	_poetry "pytest"
 }
 
 function fix {
-	_echo_run "black ."
-	_echo_run "ruff . --fix"
+	_poetry "black ."
+	_poetry "ruff . --fix"
 }
 
 function build {
