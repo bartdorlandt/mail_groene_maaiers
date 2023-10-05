@@ -286,6 +286,7 @@ class ScheduleSheet(GSheet):
         self.sheet_id = config("SCHEMA_SHEET_ID")
         self.sheet_range = f"{date.today().year}!{config('SCHEMA_SHEET_RANGE')}"
         self.short_date = get_next_saturday_datetime()
+        self.date_not_found = False
         super().__init__(credentials, notification)
 
     def _get_sheet_row(self) -> tuple[Row, bool]:
@@ -339,7 +340,8 @@ class ScheduleSheet(GSheet):
         """
         row, date_found = self._get_sheet_row()
         if not date_found:
-            return [], ""
+            self.date_not_found = True
+            return [], "Date not found."
 
         if names := self._get_sheet_row_names(row):
             return self._get_names_list(names), ""
@@ -363,6 +365,8 @@ def main() -> None:
     schedule_sheet = ScheduleSheet(credentials=credentials, notification=notify)
     schedule_sheet.get_sheet()
     names, err = schedule_sheet.names_next_date()
+    if schedule_sheet.date_not_found:
+        return
     if err:
         notify.admin_message(err)
         notify.send_message()

@@ -126,6 +126,7 @@ def test_extract_contacts_info(contacts: gm.Contacts, expected_contacts: dict[st
         ("29-05", ["29-05", "x", "  ", "", "2 bewoners", "Name4, Name5 "]),
         ("05-06", ["05-06", "x", "x", "", "2 bewoners", "Name6 en Name7"]),
         ("12-06", ["12-06", "x", "", "", "2 bewoners"]),
+        ("14-06", [""]),
     ],
 )
 def test_get_sheet_row(test_input: str, expected: list[str], schedule_sheet: gm.ScheduleSheet):
@@ -140,6 +141,22 @@ def test_get_sheet_row(test_input: str, expected: list[str], schedule_sheet: gm.
     schedule_sheet.short_date = test_input
     s, _ = schedule_sheet._get_sheet_row()
     assert s == expected
+
+
+def test_names_next_date_date_not_found(schedule_sheet: gm.ScheduleSheet):
+    sheet_list = [
+        ["Datum", "Activiteit", "", "", "Namen", "Emails"],
+        ["", "Grasmaaien + kanten", "Onkruid wieden", "Groot onderhoud*"],
+        ["29-05", "x", "  ", "", "2 bewoners", "Name4, Name5 "],
+        ["05-06", "x", "x", "", "2 bewoners", "Name6 en Name7"],
+        ["12-06", "x", "", "", "2 bewoners"],
+    ]
+    date = "14-06"
+    schedule_sheet.sheet = sheet_list
+    schedule_sheet.short_date = date
+    s, _ = schedule_sheet.names_next_date()
+    assert schedule_sheet.date_not_found is True
+    assert s == []
 
 
 @pytest.mark.parametrize(
