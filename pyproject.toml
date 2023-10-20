@@ -20,7 +20,7 @@ optional = true
 black = {extras = ["d"], version = "^23.1.0"}
 pytest = "^7.2.1"
 pytest-cov = "^4.0.0"
-mypy = "^0.991"
+mypy = "^1.0.0"
 ruff = "^0.1.0"
 nox = "^2023.4.22"
 nox-poetry = "^1.0.3"
