@@ -84,7 +84,7 @@ function rebuild {
 
 function mail {
   # shellcheck disable=SC2086
-  docker run ${docker_run_tty} --rm -v="$(pwd)":/local "${NAME}":"${VERSION}" sh -c 'python3 groene_maaiers.py'
+  docker run ${docker_run_tty} --rm -v="$(pwd)":/local "${NAME}":"${VERSION}" sh -c 'python3 main.py'
 }
 
 function sync {

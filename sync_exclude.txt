@@ -4,11 +4,15 @@
 .gitignore
 .env
 .github
+.nox
 .venv
 .vscode
 .idea
 *.old
 __pycache__
 coverage.xml
+dist
+htmlcov
+noxfile.py
 *_report.xml
-test_groene_maaiers.py
+tests
