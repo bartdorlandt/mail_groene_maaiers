@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "mail-groene-maaiers"
-version = "0.1.1"
-description = "Using a Gsheet to extract names to send out reminder using email"
+version = "0.1.2"
+description = "Using a Gsheet to extract names to send out reminders using email."
 authors = ["Bart Dorlandt <bart@bamweb.nl>"]
 license = "LICENSE"
 readme = "README.md"
@@ -12,7 +12,6 @@ google-api-python-client = "^2.76.0"
 google-auth-httplib2 = "^0.1.0"
 python-decouple = "^3.7"
 rich = "^13.3.1"
-black = {extras = ["d"], version = "^23.7.0"}
 
 [tool.poetry.group.dev]
 optional = true
@@ -23,7 +22,8 @@ pytest = "^7.2.1"
 pytest-cov = "^4.0.0"
 mypy = "^0.991"
 ruff = "^0.0.240"
-pylint = "^2.16.1"
+nox = "^2023.4.22"
+nox-poetry = "^1.0.3"
 
 [build-system]
 requires = ["poetry-core"]
@@ -45,7 +45,7 @@ addopts = "--cov=. --cov-report=xml --cov-report=term --junitxml=pytest_report.x
 
 [tool.coverage.run]
 branch = true
-omit = ["tests*"]
+omit = ["tests/*", "main.py", "noxfile.py"]
 source = ["."]
 
 [tool.ruff]
@@ -53,10 +53,7 @@ line-length = 100
 target-version = "py310"
 extend-ignore = ["F401", "F403", "PLR2004", "D203", "D213", "D407", "D406"]
 extend-select = ["I", "C90", "D", "PL", "S"]
-extend-exclude = [".git","__pycache__","dist","build",".venv", "test_*"]
+extend-exclude = [".git","__pycache__","dist","build",".venv", "test_*", "noxfile.py"]
 
 [tool.ruff.mccabe]
 max-complexity = 10
-
-[tool.pylint]
-ignore-patterns=["^test_.*$"]

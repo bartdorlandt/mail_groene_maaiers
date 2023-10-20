@@ -4,7 +4,7 @@ import os
 
 import pytest
 
-import groene_maaiers as gm
+import mail_groene_maaiers.groene_maaiers as gm
 
 
 @pytest.fixture
