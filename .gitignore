@@ -110,9 +110,6 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-.idea/
-.vscode/
-.ruff_cache
 
 # Spyder project settings
 .spyderproject
@@ -129,6 +126,13 @@ venv.bak/
 .dmypy.json
 dmypy.json
 mypy_report.xml
+
+# linting
+.ruff_cache
+
+# editor
+.idea/
+.vscode/
 
 # Pyre type checker
 .pyre/
