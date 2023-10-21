@@ -70,7 +70,7 @@ function nox:typing {
 }
 
 function build {
-  docker build --tag "${NAME}":"${VERSION}" .
+  DOCKER_BUILDKIT=1 docker build --tag "${NAME}":"${VERSION}" .
 }
 
 function clean {
@@ -84,7 +84,12 @@ function rebuild {
 
 function mail {
   # shellcheck disable=SC2086
-  docker run ${docker_run_tty} --rm -v="$(pwd)":/local "${NAME}":"${VERSION}" sh -c 'python3 main.py'
+#  docker run ${docker_run_tty} --rm -v="$(pwd)":/local "${NAME}":"${VERSION}" sh -c 'python3 main.py'
+  docker pull "${NAME}":"${VERSION}"
+  docker run ${docker_run_tty} --rm \
+    -v=.env:/local/.env \
+    -v=.credentials.json:/local/.credentials.json \
+    "${NAME}":"${VERSION}" main.py
 }
 
 function sync {
