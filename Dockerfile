@@ -1,26 +1,33 @@
 ARG PY_VERSION=3.10
-ARG POETRY_VERSION=1.4.2
+ARG POETRY_VERSION=1.6.1
 
-FROM python:${PY_VERSION}-slim
+FROM python:${PY_VERSION}-slim as builder
+# Required to bring in the variable from outside the FROM
+ARG POETRY_VERSION
+
+RUN pip install poetry==${POETRY_VERSION}
+
+ENV POETRY_NO_INTERACTION=1 \
+    POETRY_VIRTUALENVS_IN_PROJECT=1 \
+    POETRY_VIRTUALENVS_CREATE=1 \
+    POETRY_CACHE_DIR=/tmp/poetry_cache
+
+WORKDIR /app
+COPY pyproject.toml poetry.lock ./
+RUN touch README.md
+
+# Leverage poetry cache in docker build_kit
+RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --no-root
 
 
-RUN apt-get update && \
-  apt-get upgrade -y && \
-  apt-get install curl -y && \
-  apt-get autoremove -y && \
-  apt-get clean all && \
-  rm -rf /var/lib/apt/lists/*
+FROM python:${PY_VERSION}-slim as runtime
 
-RUN pip install --upgrade pip
-RUN curl -sSL https://install.python-poetry.org -o /tmp/install-poetry.py && \
-  python /tmp/install-poetry.py --version "${POETRY_VERSION}" && \
-  rm -f /tmp/install-poetry.py
+WORKDIR /app
+ENV VIRTUAL_ENV=/app/.venv \
+    PATH="/app/.venv/bin:$PATH"
 
-# Add poetry install location to the $PATH
-ENV PATH="${PATH}:/root/.local/bin"
-
-WORKDIR /local
-COPY pyproject.toml poetry.lock /local/
-
-RUN poetry config virtualenvs.create false \
-  && poetry install --no-interaction --no-ansi
+COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
+COPY mail_groene_maaiers mail_groene_maaiers/
+COPY main.py .
+#ENTRYPOINT ["python", "main.py"]
+ENTRYPOINT ["python"]
