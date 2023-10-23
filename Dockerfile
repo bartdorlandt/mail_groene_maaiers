@@ -29,5 +29,4 @@ ENV VIRTUAL_ENV=/app/.venv \
 COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 COPY mail_groene_maaiers mail_groene_maaiers/
 COPY main.py .
-#ENTRYPOINT ["python", "main.py"]
 ENTRYPOINT ["python"]

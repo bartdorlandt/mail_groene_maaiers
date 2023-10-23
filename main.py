@@ -27,6 +27,7 @@ def main() -> None:
     schedule_sheet.get_sheet()
     names, err = schedule_sheet.names_next_date()
     if schedule_sheet.date_not_found:
+        print("No work planned for this weekend. Done.")
         return
     if err:
         notify.admin_message(err)

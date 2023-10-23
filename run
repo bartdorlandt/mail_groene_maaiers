@@ -93,11 +93,12 @@ function rebuild {
 function mail {
   # shellcheck disable=SC2086
 #  docker run ${docker_run_tty} --rm -v="$(pwd)":/local "${NAME}":"${VERSION}" sh -c 'python3 main.py'
-  docker pull "${NAME}":"${VERSION}"
+  docker_image="bartdorlandt/mail_groene_maaiers"
+  docker pull "${docker_image}":"${VERSION}"
   docker run ${docker_run_tty} --rm \
-    -v=.env:/local/.env \
-    -v=.credentials.json:/local/.credentials.json \
-    "${NAME}":"${VERSION}" main.py
+    -v ./.env:/app/.env \
+    -v ./credentials.json:/app/credentials.json \
+    "${docker_image}":"${VERSION}" main.py
 }
 
 function sync {
