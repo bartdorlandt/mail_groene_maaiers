@@ -35,6 +35,14 @@ function _poetry {
   $(echo "poetry run $1")
 }
 
+function _nox_docker {
+  cmd="docker run --platform linux/amd64 --rm -it -v $(pwd):/src bartdorlandt/nox_poetry $1 -f src/noxfile.py"
+  echo "$cmd"
+  # shellcheck disable=SC2091
+  # shellcheck disable=SC2116
+  $(echo "$cmd")
+}
+
 # -----------------------------------------------------------------------------
 function install:dev {
    _echo_run "poetry install --with dev --sync"
@@ -54,19 +62,19 @@ function fix {
 
 function nox {
   # -r, re-used existing virtualenv
-	_poetry "nox -r"
+	_nox_docker "nox -r"
 }
 
 function nox:tests {
-	_poetry "nox -r -s tests"
+	_nox_docker "nox -r -s tests"
 }
 
 function nox:lint {
-	_poetry "nox -r -s lint"
+	_nox_docker "nox -r -s lint"
 }
 
 function nox:typing {
-	_poetry "nox -r -s typing"
+	_nox_docker "nox -r -s typing"
 }
 
 function build {
