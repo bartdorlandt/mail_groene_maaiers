@@ -102,7 +102,7 @@ function mail {
 }
 
 function sync {
-  rsync -avz --exclude-from=sync_exclude.txt --delete . "${REMOTE_PATH}"
+  rsync -avz credentials.json main.py run env.example "${REMOTE_PATH}"
 }
 
 function help {
