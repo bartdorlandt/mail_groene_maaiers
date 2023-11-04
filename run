@@ -49,15 +49,15 @@ function install:dev {
 }
 
 function test {
-	_poetry "ruff ."
+	_poetry "ruff check ."
+	_poetry "ruff format --diff ."
 	_poetry "mypy . --junit-xml mypy_report.xml"
-	_poetry "black --diff --color ."
 	_poetry "pytest --cov-report=html"
 }
 
 function fix {
-	_poetry "black ."
-	_poetry "ruff . --fix"
+	_poetry "ruff check . --fix"
+	_poetry "ruff format . -v"
 }
 
 function nox {

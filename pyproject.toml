@@ -17,7 +17,6 @@ rich = "^13"
 optional = true
 
 [tool.poetry.group.dev.dependencies]
-black = {extras = ["d"], version = "^23"}
 pytest = "^7"
 pytest-cov = "^4"
 mypy = "^1"
