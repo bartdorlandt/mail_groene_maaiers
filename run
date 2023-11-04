@@ -4,7 +4,8 @@ set -o errexit
 set -o pipefail
 
 # minus sign: use default if unset
-NAME="${NAME:-groene_maaiers}"
+DOCKER_USER="${DOCKER_USER:-bartdorlandt}"
+NAME="${NAME:-mail_groene_maaiers}"
 VERSION="${VERSION:-latest}"
 REMOTE_PATH="${REMOTE_PATH:-/Volumes/docker/mail_groene_maaiers/}"
 
@@ -36,7 +37,7 @@ function _poetry {
 }
 
 function _nox_docker {
-  cmd="docker run --platform linux/amd64 --rm -it -v $(pwd):/src bartdorlandt/nox_poetry $1 -f src/noxfile.py"
+  cmd="docker run --platform linux/amd64 --rm -it -v $(pwd):/src ${DOCKER_USER}/nox_poetry $1 -f src/noxfile.py"
   echo "$cmd"
   # shellcheck disable=SC2091
   # shellcheck disable=SC2116
@@ -53,6 +54,7 @@ function test {
 	_poetry "ruff format --diff ."
 	_poetry "mypy . --junit-xml mypy_report.xml"
 	_poetry "pytest --cov-report=html"
+	nox
 }
 
 function fix {
@@ -78,11 +80,11 @@ function nox:typing {
 }
 
 function build {
-  DOCKER_BUILDKIT=1 docker build --tag "${NAME}":"${VERSION}" .
+  DOCKER_BUILDKIT=1 docker build --tag "${DOCKER_USER}/${NAME}":"${VERSION}" .
 }
 
 function clean {
-  docker rmi "${NAME}":"${VERSION}" --force
+  docker rmi "${DOCKER_USER}/${NAME}":"${VERSION}" --force
 }
 
 function rebuild {
@@ -93,7 +95,7 @@ function rebuild {
 function mail {
   # shellcheck disable=SC2086
 #  docker run ${docker_run_tty} --rm -v="$(pwd)":/local "${NAME}":"${VERSION}" sh -c 'python3 main.py'
-  docker_image="bartdorlandt/mail_groene_maaiers"
+  docker_image="${DOCKER_USER}/${NAME}"
   docker pull "${docker_image}":"${VERSION}"
   docker run ${docker_run_tty} --rm \
     -v ./.env:/app/.env \
