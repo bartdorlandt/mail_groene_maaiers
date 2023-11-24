@@ -1,5 +1,5 @@
-ARG PY_VERSION=3.10
-ARG POETRY_VERSION=1.6.1
+ARG PY_VERSION=3.11
+ARG POETRY_VERSION=1.7
 
 FROM python:${PY_VERSION}-slim as builder
 # Required to bring in the variable from outside the FROM

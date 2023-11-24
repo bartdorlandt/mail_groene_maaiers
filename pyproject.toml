@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mail-groene-maaiers"
-version = "0.1.3"
+version = "0.1.4"
 description = "Using a Gsheet to extract names to send out reminders using email."
 authors = ["Bart Dorlandt <bart@bamweb.nl>"]
 license = "LICENSE"
@@ -28,12 +28,8 @@ nox-poetry = "^1"
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.black]
-line-length = 100
-target-version = ['py310']
-
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.11"
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
@@ -49,7 +45,7 @@ source = ["."]
 
 [tool.ruff]
 line-length = 100
-target-version = "py310"
+target-version = "py311"
 extend-ignore = ["F401", "F403", "PLR2004", "D203", "D213", "D407", "D406"]
 extend-select = ["I", "C90", "D", "PL", "S"]
 extend-exclude = [".git","__pycache__","dist","build",".venv", "test_*", "noxfile.py"]
