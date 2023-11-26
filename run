@@ -98,13 +98,13 @@ function mail {
   docker_image="${DOCKER_USER}/${NAME}"
   docker pull "${docker_image}":"${VERSION}"
   docker run ${docker_run_tty} --rm \
-    -v ./.env:/app/.env \
-    -v ./credentials.json:/app/credentials.json \
+    -v $(pwd)/.env:/app/.env \
+    -v $(pwd)/credentials.json:/app/credentials.json \
     "${docker_image}":"${VERSION}" main.py
 }
 
 function sync {
-  rsync -avz credentials.json main.py run env.example "${REMOTE_PATH}"
+  rsync -avz credentials.json main.py mail_groene_maaiers run env.example --exclude '**/__pycache__' "${REMOTE_PATH}"
 }
 
 function help {
