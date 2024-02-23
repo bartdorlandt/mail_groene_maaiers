@@ -17,7 +17,7 @@ rich = "^13"
 optional = true
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^8.0.0"
+pytest = "^7"
 pytest-cov = "^4"
 mypy = "^1"
 ruff = "^0"
