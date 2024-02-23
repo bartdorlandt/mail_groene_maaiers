@@ -38,8 +38,9 @@ Err: typing.TypeAlias = str
 def get_next_saturday_datetime() -> str:
     """Generate the upcoming saturday in format "%d-%m".
 
-    Returns
+    Returns:
         str: format "%d-%m" for the saturday to come
+
     """
     today = date.today()
     saturday = today + timedelta((5 - today.weekday()) % 7)
@@ -108,6 +109,7 @@ class EmailNotification(Notification):
 
         Args:
             body (str): The body content of the message
+
         """
         subject = "Groen email script issue"
         admin_address = config("ADM_EMAIL")
@@ -127,6 +129,7 @@ class EmailNotification(Notification):
             subject (str): Subject of the message
             body (str): The body content of the message
             bcc (str, optional): BCC email addresses. Defaults to "".
+
         """
         msg = EmailMessage()
         msg["From"] = self.smtp_usr
@@ -143,6 +146,7 @@ class EmailNotification(Notification):
         Args:
             names (list[str]): Names to address the text to
             emails (EMAILS): a set of email addresses to send the mail to
+
         """
         subject = f"Groen onderhoud herinnering voor {get_next_saturday_datetime()}"
         body = (
@@ -172,6 +176,7 @@ class GSheet:  # pylint: disable=too-few-public-methods
         Args:
             credentials (Credentials): Google credentials
             notification (Notification): Notification type class
+
         """
         self.credentials = credentials
         self.notification = notification
@@ -200,6 +205,7 @@ class Contacts(GSheet):
         Args:
             credentials (Credentials): Google credentials
             notification (Notification): Notification type class
+
         """
         self.contacts_name_email: PersonInfo = {}
         self.mailing_list: Emails = set()
@@ -232,6 +238,7 @@ class Contacts(GSheet):
 
         Returns:
             EMAILS (set[str]): a set of email addresses
+
         """
         for name in names:
             if name:
@@ -251,6 +258,7 @@ class Contacts(GSheet):
 
         Returns:
             EMAILS (set[str]): a set of email addresses
+
         """
         name = name.lower()
 
@@ -280,6 +288,7 @@ class ScheduleSheet(GSheet):
         Args:
             credentials (Credentials): Google credentials
             notification (Notification): Notification type class
+
         """
         self.sheet_id = config("SCHEMA_SHEET_ID")
         self.sheet_range = f"{date.today().year}!{config('SCHEMA_SHEET_RANGE')}"
@@ -292,6 +301,7 @@ class ScheduleSheet(GSheet):
 
         Returns:
             tuple[ROW, bool]: the row data and a success result.
+
         """
         return next(
             ((line, True) for line in self.sheet if line[0] == self.short_date),
@@ -306,6 +316,7 @@ class ScheduleSheet(GSheet):
 
         Returns:
             str: Extracted names
+
         """
         index = 5
         try:
@@ -326,6 +337,7 @@ class ScheduleSheet(GSheet):
 
         Returns:
             list[str]: list of names
+
         """
         split_names = re.split(pattern=r",| en |/|\.", string=names)
         return [name.strip() for name in split_names if name]
@@ -335,6 +347,7 @@ class ScheduleSheet(GSheet):
 
         Returns:
             tuple[list[str], ERR]: list of names and the error state
+
         """
         row, date_found = self._get_sheet_row()
         if not date_found:
