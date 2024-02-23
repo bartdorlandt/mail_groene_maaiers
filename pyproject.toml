@@ -17,7 +17,7 @@ rich = "^13"
 optional = true
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^8.0.0"
+pytest = "^7"
 pytest-cov = "^4"
 mypy = "^1"
 ruff = "^0"
@@ -46,9 +46,35 @@ source = ["."]
 [tool.ruff]
 line-length = 100
 target-version = "py311"
-extend-ignore = ["F401", "F403", "PLR2004", "D203", "D213", "D407", "D406"]
-extend-select = ["I", "C90", "D", "PL", "S"]
 extend-exclude = [".git","__pycache__","dist","build",".venv", "test_*", "noxfile.py"]
 
-[tool.ruff.mccabe]
+[tool.ruff.lint]
+extend-ignore = ["D203", "D213", "PLR2004"]
+extend-select = [
+    # pycodestyle Google style
+    "D", 
+    # pycodestyle errors and warnings
+    "E", "W",
+    # mccabe
+    "C90",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "UP",
+    # pylint
+    "PL",
+    # flake8-bugbear
+    "B",
+    # flake8-simplify
+    "SIM",
+    # isort
+    "I",
+    # flake8-bandit
+    "S",
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.mccabe]
 max-complexity = 10
