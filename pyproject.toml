@@ -21,7 +21,7 @@ pytest = "^8.0.0"
 pytest-cov = "^4"
 mypy = "^1"
 ruff = "^0"
-nox = "^2023.4.22"
+nox = "^2024.0.0"
 nox-poetry = "^1"
 
 [build-system]
