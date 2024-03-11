@@ -1,0 +1,43 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended"
+  ],
+  "schedule": ["before 7am on the 1st day of the month"],
+  "packageRules": [
+    {
+      "automerge": true,
+      "groupName": "poetry dev minor",
+      "matchDepTypes": ["dev"],
+      "matchManagers": ["poetry"],
+      "matchUpdateTypes": [
+        "bump",
+        "digest",
+        "lockFileMaintenance",
+        "minor",
+        "patch",
+        "pin",
+        "rollback"
+      ],
+    },
+    {
+      "automerge": true,
+      "groupName": "poetry dev major",
+      "matchDepTypes": ["dev"],
+      "matchManagers": ["poetry"],
+      "matchUpdateTypes": ["major"],
+    },
+    {
+      "groupName": "Python Poetry Non-Major Dependencies",
+      "matchDepTypes": ["dependencies"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true,
+    },
+    {
+      "groupName": "Python Poetry Major Dependencies",
+      "matchDepTypes": ["dependencies"],
+      "matchUpdateTypes": ["major"],
+      "automerge": false,
+    }
+  ]
+}
