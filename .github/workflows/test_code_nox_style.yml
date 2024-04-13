@@ -15,7 +15,6 @@ jobs:
       session: ${{ steps.set-matrix.outputs.session }}
     steps:
     - uses: actions/checkout@v4
-    - uses: wntrblm/nox@main
     - run: pip install nox-poetry
     - id: set-matrix
       shell: bash
@@ -32,6 +31,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: wntrblm/nox@main
-    - run: pip install poetry
-    - run: pip install nox-poetry
-    - run: nox -s "${{ matrix.session }}"
+    - name: Install Poetry Action
+      uses: snok/install-poetry@v1.3.4
+    - run: poetry install --with=dev --no-root
+    - run: poetry run nox -s "${{ matrix.session }}"
