@@ -14,7 +14,7 @@ def tests(session):
 @nox_session(python=py_versions[0])
 def lint(session):
     session.install("ruff")
-    session.run("ruff", ".")
+    session.run("ruff", "check", ".")
 
 
 @nox_session(python=py_versions[0])

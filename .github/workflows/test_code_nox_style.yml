@@ -32,5 +32,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: wntrblm/nox@main
-    - run: pip install nox-poetry poetry
+    - run: pip install poetry
+    - run: pip install nox-poetry
     - run: nox -s "${{ matrix.session }}"
