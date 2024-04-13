@@ -134,7 +134,7 @@ class EmailNotification(Notification):
         msg = EmailMessage()
         msg["From"] = self.smtp_usr
         msg["Reply-to"] = self.reply_to
-        msg["To"] = mail_to
+        msg["To"] = mail_to  # type: ignore
         msg["Bcc"] = bcc
         msg["Subject"] = subject
         msg.set_content(body)
