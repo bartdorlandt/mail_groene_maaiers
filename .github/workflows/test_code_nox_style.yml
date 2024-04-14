@@ -15,7 +15,9 @@ jobs:
       session: ${{ steps.set-matrix.outputs.session }}
     steps:
     - uses: actions/checkout@v4
-    - run: pip install nox-poetry
+    - uses: wntrblm/nox@main
+      with:
+        python-version: 3.11
     - id: set-matrix
       shell: bash
       run: echo session=$(nox --json -l | jq -c '[.[].session]') | tee --append $GITHUB_OUTPUT
