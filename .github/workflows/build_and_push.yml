@@ -15,29 +15,15 @@ env:
   LATEST_TAG: ${{ github.repository }}:latest
 
 jobs:
-  push_to_registry:
-    name: Push Docker image to Docker Hub
+  build:
+    name: Build Docker image
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
 
-      - name: Install poetry
-        run: pip install poetry
-
-      - name: Get version from poetry
-        id: poetry_version
-        shell: bash
-        run: echo poetry_version=$(poetry version -s) | tee --append $GITHUB_OUTPUT
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and export to Docker
         uses: docker/build-push-action@v5
@@ -49,6 +35,31 @@ jobs:
       - name: Test
         run: |
           docker run --rm ${{ env.TEST_TAG }}
+
+  push:
+    name: Push Docker image to Docker Hub
+    runs-on: ubuntu-latest
+    if: ${{ github.actor != 'dependabot[bot]' }}
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Install Poetry Action
+        uses: snok/install-poetry@v1.3.4
+
+      - name: Get version from poetry
+        id: poetry_version
+        shell: bash
+        run: echo poetry_version=$(poetry version -s) | tee --append $GITHUB_OUTPUT
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Build and push with run number
         uses: docker/build-push-action@v5
