@@ -45,7 +45,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Poetry Action
-        uses: snok/install-poetry@v1.3.4
+        uses: snok/install-poetry@v1.4.1
 
       - name: Get version from poetry
         id: poetry_version
