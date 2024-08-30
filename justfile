@@ -73,3 +73,7 @@ install:
 [group('init')]
 install_dev:
 	uv sync
+
+[group('act')]
+act_checks:
+	act -j checks
