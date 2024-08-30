@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Main execution script."""
+
 import os
 
 from google.oauth2 import service_account
 
-from mail_groene_maaiers.groene_maaiers import (
+from src.mail_groene_maaiers.mail_groene_maaiers import (
     Contacts,
     EmailNotification,
     ScheduleSheet,

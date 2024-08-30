@@ -1,36 +1,38 @@
-[tool.poetry]
+[project]
 name = "mail-groene-maaiers"
-version = "0.1.4"
+version = "0.2.0"
 description = "Using a Gsheet to extract names to send out reminders using email."
-authors = ["Bart Dorlandt <bart@bamweb.nl>"]
-license = "LICENSE"
 readme = "README.md"
-
-[tool.poetry.dependencies]
-python = "^3.10"
-google-api-python-client = "^2"
-google-auth-httplib2 = "^0"
-python-decouple = "^3"
-rich = "^13"
-
-[tool.poetry.group.dev]
-optional = true
-
-[tool.poetry.group.dev.dependencies]
-pytest = "^8.0.0"
-pytest-cov = "^5.0.0"
-mypy = "^1"
-ruff = "^0"
-nox = "^2024.0.0"
-nox-poetry = "^1"
+authors = [{name = "Bart Dorlandt", email = "bart@bamweb.nl"}]
+requires-python = ">=3.12"
+dependencies = [
+    "google-api-python-client>=2.142.0",
+    "google-auth-httplib2>=0.2.0",
+    "python-decouple>=3.8",
+    "rich>=13.7.1",
+]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mail_groene_maaiers"]
+
+[tool.uv]
+python-preference = "managed"
+dev-dependencies = [
+    "pytest>=8.3.2",
+    "pytest-cov>=5.0.0",
+    "mypy>=1.11.1",
+    "ruff>=0.6.1",
+    "nox>=2024.4.15",
+]
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.12"
 ignore_missing_imports = true
+enable_incomplete_feature = "NewGenericSyntax"
 
 [tool.pytest.ini_options]
 filterwarnings = [
@@ -45,14 +47,14 @@ source = ["."]
 
 [tool.ruff]
 line-length = 100
-target-version = "py311"
+target-version = "py312"
 extend-exclude = [".git","__pycache__","dist","build",".venv", "test_*", "noxfile.py"]
 
 [tool.ruff.lint]
 extend-ignore = ["D203", "D213", "PLR2004"]
 extend-select = [
     # pycodestyle Google style
-    "D", 
+    "D",
     # pycodestyle errors and warnings
     "E", "W",
     # mccabe

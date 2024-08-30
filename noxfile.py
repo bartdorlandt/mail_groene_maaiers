@@ -1,23 +1,24 @@
 """noxfile."""
-from nox_poetry import session as nox_session
+from nox import session
+import nox
 
-py_versions = ["3.10", "3.11", "3.12"]
+nox.options.default_venv_backend = "uv"
 
 
-@nox_session(python=py_versions)
+@session()
 def tests(session):
+    session.install(".",)
     session.install("pytest", "pytest-cov")
-    session.run_always("poetry", "install", external=True)
     session.run("pytest")
 
 
-@nox_session(python=py_versions[0])
+@session()
 def lint(session):
     session.install("ruff")
     session.run("ruff", "check", ".")
 
 
-@nox_session(python=py_versions[0])
+@session()
 def typing(session):
     session.install("mypy")
     session.run("mypy", ".", "--junit-xml", "mypy_report.xml")
