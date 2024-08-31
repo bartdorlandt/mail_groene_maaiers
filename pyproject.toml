@@ -32,7 +32,6 @@ dev-dependencies = [
 [tool.mypy]
 python_version = "3.12"
 ignore_missing_imports = true
-enable_incomplete_feature = "NewGenericSyntax"
 
 [tool.pytest.ini_options]
 filterwarnings = [

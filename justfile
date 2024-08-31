@@ -47,7 +47,7 @@ build:
 	DOCKER_BUILDKIT=1 docker build --tag "{{DOCKER_USER}}/{{NAME}}":"{{VERSION}}" .
 
 [group('docker')]
-clean:
+clean_docker:
 	docker rmi "{{DOCKER_USER}}/{{NAME}}":"{{VERSION}}" --force
 
 [group('docker')]
@@ -74,6 +74,18 @@ install:
 install_dev:
 	uv sync
 
+[group('init')]
+clean:
+	rm -rf .venv .nox .ruff_cache .pytest_cache .mypy_cache .coverage htmlcov __pycache__ coverage.xml pytest_report.xml mypy_report.xml
+
 [group('act')]
 act_checks:
 	act -j checks
+
+[group('act')]
+act_build:
+	act -j build
+
+[group('act')]
+act_push:
+	act -j push
