@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 """Groene maaiers script for sending emails to enlisted users on a Gsheet."""
+
 import re
 import smtplib
 import ssl
-import typing
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import date, timedelta
 from email.message import EmailMessage
 
-from apiclient import discovery
 from decouple import config
 from google.oauth2.service_account import Credentials
+from googleapiclient import discovery
 from rich import print as pprint
 
 
@@ -28,11 +28,11 @@ class Person:
     extra: str = ""
 
 
-PersonInfo: typing.TypeAlias = dict[str, Person]
-Sheet: typing.TypeAlias = list[list[str]]
-Row: typing.TypeAlias = list[str]
-Emails: typing.TypeAlias = set[str]
-Err: typing.TypeAlias = str
+type PersonInfo = dict[str, Person]
+type Sheet = list[list[str]]
+type Row = list[str]
+type Emails = set[str]
+type Err = str
 
 
 def get_next_saturday_datetime() -> str:

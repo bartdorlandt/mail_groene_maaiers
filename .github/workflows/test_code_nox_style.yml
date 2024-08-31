@@ -2,36 +2,26 @@
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 name: Test code using nox
 
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+on: [push, pull_request]
 
 jobs:
-  generate-jobs:
-    runs-on: ubuntu-latest
-    outputs:
-      session: ${{ steps.set-matrix.outputs.session }}
-    steps:
-    - uses: actions/checkout@v4
-    - run: pip install nox-poetry
-    - id: set-matrix
-      shell: bash
-      run: echo session=$(nox --json -l | jq -c '[.[].session]') | tee --append $GITHUB_OUTPUT
-
   checks:
-    name: Session ${{ matrix.session }}
-    needs: [generate-jobs]
+    name: Nox checks
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        session: ${{ fromJson(needs.generate-jobs.outputs.session) }}
     steps:
-    - uses: actions/checkout@v4
-    - uses: wntrblm/nox@main
-    - name: Install Poetry Action
-      uses: snok/install-poetry@v1.4.1
-    - run: poetry install --with=dev --no-root
-    - run: poetry run nox -s "${{ matrix.session }}"
+      - uses: actions/checkout@v4
+
+      - name: Set up uv
+        # Install latest uv version using the installer
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+      - name: "Set up Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: "pyproject.toml"
+
+      - name: Install the project
+        run: uv sync --all-extras --dev
+
+      - name: Run nox
+        run: uv run nox

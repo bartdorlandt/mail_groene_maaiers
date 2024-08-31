@@ -2,9 +2,9 @@ name: Build and Push Docker Image to Docker Hub
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ $default-branch ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ $default-branch ]
 
 env:
   # Use docker.io for Docker Hub if empty
@@ -44,13 +44,11 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v4
 
-      - name: Install Poetry Action
-        uses: snok/install-poetry@v1.4.1
-
-      - name: Get version from poetry
-        id: poetry_version
-        shell: bash
-        run: echo poetry_version=$(poetry version -s) | tee --append $GITHUB_OUTPUT
+      - name: Get version from pyproject
+        uses: sondrewkk/pyproject-version@v1
+        id: pyproject_version
+        with:
+          path: .
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
@@ -67,7 +65,8 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ env.IMAGE_NAME }}:${{ steps.poetry_version.outputs.poetry_version }}-${{ github.run_number }}
+          # Get version from uv
+          tags: ${{ env.IMAGE_NAME }}:${{ steps.pyproject_version.outputs.version }}-${{ github.run_number }}
 
       - name: Build and push with latest
         uses: docker/build-push-action@v6
