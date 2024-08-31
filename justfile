@@ -55,16 +55,11 @@ rebuild clean build:
 
 [group('mail')]
 mail:
-	docker_image="{{DOCKER_USER}}/{{NAME}}"
-	docker pull "${docker_image}":"{{VERSION}}"
-	docker run {{docker_run_tty}} --rm \
-		-v $(pwd)/.env:/app/.env \
-		-v $(pwd)/credentials.json:/app/credentials.json \
-		"${docker_image}":"{{VERSION}}" main.py
+	./mail.sh
 
 [group('sync')]
 sync:
-	rsync -avz credentials.json main.py mail_groene_maaiers run env.example --exclude '**/__pycache__' "{{REMOTE_PATH}}"
+	rsync -avz credentials.json main.py mail.sh src justfile env.example --exclude '**/__pycache__' "{{REMOTE_PATH}}"
 
 [group('init')]
 install:
@@ -76,7 +71,7 @@ install_dev:
 
 [group('init')]
 clean:
-	rm -rf .venv .nox .ruff_cache .pytest_cache .mypy_cache .coverage htmlcov __pycache__ coverage.xml pytest_report.xml mypy_report.xml
+	rm -rf .venv .nox .ruff_cache .pytest_cache .mypy_cache .coverage htmlcov __pycache__ coverage.xml pytest_report.xml mypy_report.xml dist
 
 [group('act')]
 act_checks:
