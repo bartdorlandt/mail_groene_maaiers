@@ -19,7 +19,7 @@ _nox_docker +CMD:
 test:
 	uv run ruff check .
 	uv run ruff format --diff .
-	uv run mypy . --junit-xml mypy_report.xml
+	uv run mypy . --junit-xml mypy_report.xml --enable-incomplete-feature=NewGenericSyntax
 	uv run pytest --cov-report=html
 
 fix:
