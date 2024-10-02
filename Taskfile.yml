@@ -14,21 +14,23 @@ vars:
 tasks:
   default: task --list --sort none
 
-  test:
+  python_test:
     desc: "Running python tests"
+    aliases: [test]
     cmds:
       - uv run ruff check .
       - uv run ruff format --diff .
       - uv run mypy . --junit-xml mypy_report.xml --enable-incomplete-feature=NewGenericSyntax
       - uv run pytest --cov-report=html
-  fix:
+  python_fix:
     desc: "Run python formatters"
+    aliases: [fix]
     cmds:
       - uv run ruff check . --fix
       - uv run ruff format . -v
 
   _nox_docker:
-    silent: true
+    internal: true
     cmds:
       - echo docker run --platform linux/amd64 --rm -it -v $(pwd):/src python_nox_uv uv run {{.CMD}} -f src/noxfile.py
     requires:
@@ -66,22 +68,19 @@ tasks:
 
   docker_build:
     desc: "Build the docker image"
-    aliases:
-      - build
+    aliases: [build, Dbuild]
     cmds:
       - DOCKER_BUILDKIT=1 docker build --tag "{{DOCKER_USER}}/{{name}}":"{{VERSION}}" .
 
   docker_clean:
     desc: "Clean the docker image"
-    aliases:
-      - clean_docker
+    aliases: [clean_docker, Dclean]
     cmds:
       - docker rmi "{{DOCKER_USER}}/{{name}}":"{{VERSION}}" --force
 
   docker_rebuild:
     desc: "Rebuild the docker image"
-    aliases:
-      - rebuild
+    aliases: [rebuild, Drebuild]
     cmds:
       - task: docker_clean
       - task: docker_build
@@ -94,6 +93,7 @@ tasks:
 
   sync:
     desc: "Sync the files to the remote system"
+    silent: true
     cmds:
       - rsync -avz credentials.json main.py mail.sh src justfile env.example --exclude '**/__pycache__' "{{REMOTE_PATH}}"
 
@@ -111,6 +111,7 @@ tasks:
 
   clean:
     desc: "Clean up the files and dirs"
+    silent: true
     cmds:
       - rm -rf .venv .nox .ruff_cache .pytest_cache .mypy_cache .coverage htmlcov __pycache__ coverage.xml pytest_report.xml mypy_report.xml dist
 
