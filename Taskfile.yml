@@ -1,0 +1,135 @@
+version: "3"
+
+env:
+  TAGS: "all"
+  DOCKER_USER: 'bartdorlandt'
+  VERSION: 'latest'
+  REMOTE_PATH: '/Volumes/docker/mail_groene_maaiers'
+
+vars:
+  docker_compose_tty: ""
+  docker_run_tty: "-it"
+  name: 'mail_groene_maaiers'
+
+tasks:
+  default: task --list --sort none
+
+  # print: echo TAGS = $TAGS
+
+  test:
+    desc: "Running python tests"
+    cmds:
+      - uv run ruff check .
+      - uv run ruff format --diff .
+      - uv run mypy . --junit-xml mypy_report.xml --enable-incomplete-feature=NewGenericSyntax
+      - uv run pytest --cov-report=html
+  fix:
+    desc: "Run python formatters"
+    cmds:
+      - uv run ruff check . --fix
+      - uv run ruff format . -v
+
+  _nox_docker:
+    silent: true
+    cmds:
+      - echo docker run --platform linux/amd64 --rm -it -v $(pwd):/src python_nox_uv uv run {{.CMD}} -f src/noxfile.py
+    requires:
+      vars:
+        - CMD
+
+  nox:
+    desc: "Run nox inside a docker"
+    cmds:
+      - task: _nox_docker
+        vars:
+          CMD: nox
+
+  nox_tests:
+    desc: "Run nox -s tests inside a docker"
+    cmds:
+      - task: _nox_docker
+        vars:
+          CMD: nox -s tests
+
+  nox_lint:
+    desc: "Run nox -s lint inside a docker"
+    cmds:
+      - task: _nox_docker
+        vars:
+          CMD: nox -s lint
+
+  nox_typing:
+    desc: "Run nox -s typing inside a docker"
+    cmds:
+      - task: _nox_docker
+        vars:
+          CMD: nox -s typing
+
+
+  docker_build:
+    desc: "Build the docker image"
+    aliases:
+      - build
+    cmds:
+      - DOCKER_BUILDKIT=1 docker build --tag "{{DOCKER_USER}}/{{name}}":"{{VERSION}}" .
+
+  docker_clean:
+    desc: "Clean the docker image"
+    aliases:
+      - clean_docker
+    cmds:
+      - docker rmi "{{DOCKER_USER}}/{{name}}":"{{VERSION}}" --force
+
+  docker_rebuild:
+    desc: "Rebuild the docker image"
+    aliases:
+      - rebuild
+    cmds:
+      - task: docker_clean
+      - task: docker_build
+
+  mail:
+    desc: "Send the email"
+    silent: true
+    cmds:
+      - ./mail.sh
+
+  sync:
+    desc: "Sync the files to the remote system"
+    cmds:
+      - rsync -avz credentials.json main.py mail.sh src justfile env.example --exclude '**/__pycache__' "{{REMOTE_PATH}}"
+
+  install_no_dev:
+    desc: "Install the python dependencies"
+    aliases:
+      - install
+    cmds:
+      - uv sync --no-dev
+
+  install_dev:
+    desc: "Install the python dependencies"
+    cmds:
+      - uv sync
+
+  clean:
+    desc: "Clean up the files and dirs"
+    cmds:
+      - rm -rf .venv .nox .ruff_cache .pytest_cache .mypy_cache .coverage htmlcov __pycache__ coverage.xml pytest_report.xml mypy_report.xml dist
+
+  act_checks:
+    desc: "Run checks with act, to test github actions"
+    cmds:
+      - act -j checks
+
+  act_build:
+    desc: "Run build with act, to test github actions"
+    cmds:
+      - act -j build
+
+  act_push:
+    desc: "Run push with act, to test github actions"
+    cmds:
+      - act -j push
+
+
+
