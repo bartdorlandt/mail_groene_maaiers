@@ -12,16 +12,12 @@ vars:
   name: 'mail_groene_maaiers'
 
 tasks:
-  default: task --list --sort none
+  default: task --list-all --sort none
 
-  python_test:
+  test:
     desc: "Running python tests"
-    aliases: [test]
-    cmds:
-      - uv run ruff check .
-      - uv run ruff format --diff .
-      - uv run mypy . --junit-xml mypy_report.xml --enable-incomplete-feature=NewGenericSyntax
-      - uv run pytest --cov-report=html
+    deps: [pytest, mypy, ruff]
+
   python_fix:
     desc: "Run python formatters"
     aliases: [fix]
@@ -29,54 +25,33 @@ tasks:
       - uv run ruff check . --fix
       - uv run ruff format . -v
 
-  _nox_docker:
-    internal: true
+  pytest:
+    desc: "Run pytest"
     cmds:
-      - echo docker run --platform linux/amd64 --rm -it -v $(pwd):/src python_nox_uv uv run {{.CMD}} -f src/noxfile.py
-    requires:
-      vars:
-        - CMD
+      - uv run pytest -v
 
-  nox:
-    desc: "Run nox inside a docker"
+  mypy:
+    desc: "Run mypy"
     cmds:
-      - task: _nox_docker
-        vars:
-          CMD: nox
+      - uv run mypy . --junit-xml mypy_report.xml --enable-incomplete-feature=NewGenericSyntax
 
-  nox_tests:
-    desc: "Run nox -s tests inside a docker"
+  ruff:
+    desc: "Run ruff"
     cmds:
-      - task: _nox_docker
-        vars:
-          CMD: nox -s tests
-
-  nox_lint:
-    desc: "Run nox -s lint inside a docker"
-    cmds:
-      - task: _nox_docker
-        vars:
-          CMD: nox -s lint
-
-  nox_typing:
-    desc: "Run nox -s typing inside a docker"
-    cmds:
-      - task: _nox_docker
-        vars:
-          CMD: nox -s typing
-
+      - uv run ruff check .
+      - uv run ruff format --diff .
 
   docker_build:
     desc: "Build the docker image"
-    aliases: [build, Dbuild]
+    aliases: [build, Dbuild, docker]
     cmds:
-      - DOCKER_BUILDKIT=1 docker build --tag "{{DOCKER_USER}}/{{name}}":"{{VERSION}}" .
+      - DOCKER_BUILDKIT=1 docker build --tag "{{.DOCKER_USER}}/{{.name}}":"{{.VERSION}}" .
 
   docker_clean:
     desc: "Clean the docker image"
     aliases: [clean_docker, Dclean]
     cmds:
-      - docker rmi "{{DOCKER_USER}}/{{name}}":"{{VERSION}}" --force
+      - docker rmi "{{.DOCKER_USER}}/{{.name}}":"{{.VERSION}}" --force
 
   docker_rebuild:
     desc: "Rebuild the docker image"
@@ -95,18 +70,19 @@ tasks:
     desc: "Sync the files to the remote system"
     silent: true
     cmds:
-      - rsync -avz credentials.json main.py mail.sh src justfile env.example --exclude '**/__pycache__' "{{REMOTE_PATH}}"
+      - rsync -avz credentials.json main.py mail.sh src justfile env.example --exclude '**/__pycache__' "{{.REMOTE_PATH}}"
 
   install_no_dev:
     desc: "Install the python dependencies"
-    aliases:
-      - install
+    aliases: [install]
     cmds:
+      - uv venv
       - uv sync --no-dev
 
   install_dev:
     desc: "Install the python dependencies"
     cmds:
+      - uv venv
       - uv sync
 
   clean:

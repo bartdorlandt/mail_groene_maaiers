@@ -1,12 +1,12 @@
 # This workflow will install Python dependencies, run tests and lint with a single version of Python
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
-name: Test code using nox
+name: Test code
 
 on: [push, pull_request]
 
 jobs:
   checks:
-    name: Nox checks
+    name: CI pipeline
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -14,6 +14,12 @@ jobs:
       - name: Set up uv
         # Install latest uv version using the installer
         run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+      - name: Install Task
+        uses: arduino/setup-task@v2
+        with:
+          version: 3.x
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: "Set up Python"
         uses: actions/setup-python@v5
@@ -23,5 +29,6 @@ jobs:
       - name: Install the project
         run: uv sync --all-extras --dev
 
-      - name: Run nox
-        run: uv run nox
+      - name: Run tests
+        shell: bash
+        run: task test
