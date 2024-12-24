@@ -1,6 +1,6 @@
 ARG PY_VERSION=3.12
 
-FROM python:${PY_VERSION}-slim as builder
+FROM python:${PY_VERSION}-slim AS builder
 # Required to bring in the variable from outside the FROM
 
 RUN pip install uv
@@ -14,7 +14,7 @@ RUN touch README.md
 # RUN --mount=type=cache,target=$POETRY_CACHE_DIR uv sync
 RUN uv sync --no-dev
 
-FROM python:${PY_VERSION}-slim as runtime
+FROM python:${PY_VERSION}-slim AS runtime
 
 WORKDIR /app
 ENV VIRTUAL_ENV=/app/.venv \

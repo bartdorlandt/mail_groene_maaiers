@@ -3,7 +3,7 @@ name = "mail-groene-maaiers"
 version = "0.2.0"
 description = "Using a Gsheet to extract names to send out reminders using email."
 readme = "README.md"
-authors = [{name = "Bart Dorlandt", email = "bart@bamweb.nl"}]
+authors = [{ name = "Bart Dorlandt", email = "bart@bamweb.nl" }]
 requires-python = ">=3.12"
 dependencies = [
     "google-api-python-client>=2.142.0",
@@ -26,7 +26,6 @@ dev-dependencies = [
     "pytest-cov>=5.0.0",
     "mypy>=1.11.1",
     "ruff>=0.6.1",
-    "nox>=2024.4.15",
 ]
 
 [tool.mypy]
@@ -47,7 +46,15 @@ source = ["."]
 [tool.ruff]
 line-length = 100
 target-version = "py312"
-extend-exclude = [".git","__pycache__","dist","build",".venv", "test_*", "noxfile.py"]
+extend-exclude = [
+    ".git",
+    "__pycache__",
+    "dist",
+    "build",
+    ".venv",
+    "test_*",
+    "noxfile.py",
+]
 
 [tool.ruff.lint]
 extend-ignore = ["D203", "D213", "PLR2004"]
@@ -55,7 +62,8 @@ extend-select = [
     # pycodestyle Google style
     "D",
     # pycodestyle errors and warnings
-    "E", "W",
+    "E",
+    "W",
     # mccabe
     "C90",
     # Pyflakes
