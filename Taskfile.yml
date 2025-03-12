@@ -70,7 +70,7 @@ tasks:
     desc: "Sync the files to the remote system"
     silent: true
     cmds:
-      - rsync -avz credentials.json main.py mail.sh src justfile env.example --exclude '**/__pycache__' "{{.REMOTE_PATH}}"
+      - rsync -avz credentials.json main.py mail.sh src Taskfile.yml env.example --exclude '**/__pycache__' "{{.REMOTE_PATH}}"
 
   install_no_dev:
     desc: "Install the python dependencies"
