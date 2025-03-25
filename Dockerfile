@@ -10,8 +10,6 @@ COPY pyproject.toml uv.lock ./
 COPY src/mail_groene_maaiers src/mail_groene_maaiers/
 RUN touch README.md
 
-# Leverage poetry cache in docker build_kit
-# RUN --mount=type=cache,target=$POETRY_CACHE_DIR uv sync
 RUN uv sync --no-dev
 
 FROM python:${PY_VERSION}-slim AS runtime
