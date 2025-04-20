@@ -9,10 +9,12 @@ from dataclasses import dataclass
 from datetime import date, timedelta
 from email.message import EmailMessage
 
-from decouple import config
+from environs import env
 from google.oauth2.service_account import Credentials
 from googleapiclient import discovery
 from rich import print as pprint
+
+env.read_env(recurse=False)
 
 
 class SendMailError(Exception):
@@ -80,12 +82,12 @@ class EmailNotification(Notification):
 
     def __init__(self) -> None:
         """Init EmailNotification."""
-        self.email_on: bool = config("EMAIL_ON", default=False, cast=bool)
-        self.smtp_srv: str = config("SMTP_SRV")
-        self.smtp_port: int = config("SMTP_PORT", default=465, cast=int)
-        self.smtp_usr: str = config("SMTP_USR")
-        self.smtp_pwd: str = config("SMTP_PWD")
-        self.reply_to: str = config("REPLY_TO")
+        self.email_on = env.bool("EMAIL_ON", default=False)
+        self.smtp_srv = env.str("SMTP_SRV")
+        self.smtp_port = env.int("SMTP_PORT", default=465)
+        self.smtp_usr = env.str("SMTP_USR")
+        self.smtp_pwd = env.str("SMTP_PWD")
+        self.reply_to = env.str("REPLY_TO")
 
     def send_message(self) -> None:
         """Send the email."""
@@ -112,8 +114,8 @@ class EmailNotification(Notification):
 
         """
         subject = "Groen email script issue"
-        admin_address = config("ADM_EMAIL")
-        self.generate_message(mail_to=admin_address, subject=subject, body=body)
+        admin_address = env.str("ADM_EMAIL")
+        self.generate_message(mail_to=set(admin_address), subject=subject, body=body)
 
     def generate_message(
         self,
@@ -152,14 +154,14 @@ class EmailNotification(Notification):
         body = (
             f"Beste {', '.join(names)},\n\n"
             "Voor aanstaand weekend sta je aangemeld voor het onderhoud aan de binnentuin.\n"
-            f"Via {config('GROEN_CONTACT')} ({config('GROEN_MOBIEL')}) kan het "
+            f"Via {env.str('GROEN_CONTACT')} ({env.str('GROEN_MOBIEL')}) kan het "
             "gereedschap geregeld worden.\n"
             "Stem het aub tijdig af zodat je niet voor een dichte deur staat.\n\n"
             "Mocht het onverhoopt niet door kunnen gaan, regel even iemand anders of "
             "laat het de groencommissie even weten.\n\n"
-            f"Stuur een antwoord naar email: {config('REPLY_TO')}\n"
+            f"Stuur een antwoord naar email: {env.str('REPLY_TO')}\n"
         )
-        self.generate_message(mail_to=emails, subject=subject, body=body, bcc=config("ADM_EMAIL"))
+        self.generate_message(mail_to=emails, subject=subject, body=body, bcc=env.str("ADM_EMAIL"))
 
 
 class GSheet:  # pylint: disable=too-few-public-methods
@@ -209,8 +211,8 @@ class Contacts(GSheet):
         """
         self.contacts_name_email: PersonInfo = {}
         self.mailing_list: Emails = set()
-        self.sheet_id = config("CONTACTS_SHEET_ID")
-        self.sheet_range = f"contacts!{config('CONTACTS_SHEET_RANGE')}"
+        self.sheet_id = env.str("CONTACTS_SHEET_ID")
+        self.sheet_range = f"contacts!{env.str('CONTACTS_SHEET_RANGE')}"
         super().__init__(credentials, notification)
 
     def get_contact_name_email(self):
@@ -290,8 +292,8 @@ class ScheduleSheet(GSheet):
             notification (Notification): Notification type class
 
         """
-        self.sheet_id = config("SCHEMA_SHEET_ID")
-        self.sheet_range = f"{date.today().year}!{config('SCHEMA_SHEET_RANGE')}"
+        self.sheet_id = env.str("SCHEMA_SHEET_ID")
+        self.sheet_range = f"{date.today().year}!{env.str('SCHEMA_SHEET_RANGE')}"
         self.short_date = get_next_saturday_datetime()
         self.date_not_found = False
         super().__init__(credentials, notification)

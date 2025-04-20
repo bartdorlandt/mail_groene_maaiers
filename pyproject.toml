@@ -1,14 +1,14 @@
 [project]
 name = "mail-groene-maaiers"
-version = "0.2.0"
+version = "0.2.1"
 description = "Using a Gsheet to extract names to send out reminders using email."
 readme = "README.md"
 authors = [{ name = "Bart Dorlandt", email = "bart@bamweb.nl" }]
 requires-python = ">=3.12"
 dependencies = [
+    "environs>=14.1.1",
     "google-api-python-client>=2.142.0",
     "google-auth-httplib2>=0.2.0",
-    "python-decouple>=3.8",
     "rich>=13.7.1",
 ]
 
