@@ -2,14 +2,14 @@ version: "3"
 
 env:
   TAGS: "all"
-  DOCKER_USER: 'bartdorlandt'
-  VERSION: 'latest'
-  REMOTE_PATH: '/Volumes/docker/mail_groene_maaiers'
+  DOCKER_USER: "bartdorlandt"
+  VERSION: "latest"
+  REMOTE_PATH: "/Volumes/docker/mail_groene_maaiers"
 
 vars:
   docker_compose_tty: ""
   docker_run_tty: "-it"
-  name: 'mail_groene_maaiers'
+  name: "mail_groene_maaiers"
 
 tasks:
   default: task --list-all --sort none
@@ -41,19 +41,19 @@ tasks:
       - uv run ruff check .
       - uv run ruff format --diff .
 
-  docker_build:
+  docker:build:
     desc: "Build the docker image"
     aliases: [build, Dbuild, docker]
     cmds:
       - DOCKER_BUILDKIT=1 docker build --tag "{{.DOCKER_USER}}/{{.name}}":"{{.VERSION}}" .
 
-  docker_clean:
+  docker:clean:
     desc: "Clean the docker image"
     aliases: [clean_docker, Dclean]
     cmds:
       - docker rmi "{{.DOCKER_USER}}/{{.name}}":"{{.VERSION}}" --force
 
-  docker_rebuild:
+  docker:rebuild:
     desc: "Rebuild the docker image"
     aliases: [rebuild, Drebuild]
     cmds:
@@ -72,14 +72,14 @@ tasks:
     cmds:
       - rsync -avz credentials.json main.py mail.sh src Taskfile.yml env.example --exclude '**/__pycache__' "{{.REMOTE_PATH}}"
 
-  install_no_dev:
+  install:nodev:
     desc: "Install the python dependencies"
     aliases: [install]
     cmds:
       - uv venv
       - uv sync --no-dev
 
-  install_dev:
+  install:dev:
     desc: "Install the python dependencies"
     cmds:
       - uv venv
@@ -91,20 +91,17 @@ tasks:
     cmds:
       - rm -rf .venv .nox .ruff_cache .pytest_cache .mypy_cache .coverage htmlcov __pycache__ coverage.xml pytest_report.xml mypy_report.xml dist
 
-  act_checks:
+  act:checks:
     desc: "Run checks with act, to test github actions"
     cmds:
       - act -j checks
 
-  act_build:
+  act:build:
     desc: "Run build with act, to test github actions"
     cmds:
       - act -j build
 
-  act_push:
+  act:push:
     desc: "Run push with act, to test github actions"
     cmds:
       - act -j push
-
-
-

@@ -115,7 +115,7 @@ class EmailNotification(Notification):
         """
         subject = "Groen email script issue"
         admin_address = env.str("ADM_EMAIL")
-        self.generate_message(mail_to=set(admin_address), subject=subject, body=body)
+        self.generate_message(mail_to={admin_address}, subject=subject, body=body)
 
     def generate_message(
         self,

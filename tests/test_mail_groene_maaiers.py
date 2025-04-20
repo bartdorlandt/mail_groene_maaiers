@@ -41,24 +41,24 @@ def expected_contacts() -> dict[str, gm.Person]:
 
 
 @pytest.fixture(autouse=True)
-def set_os_environment() -> None:
-    os.environ["SMTP_USR"] = "testuser@domain.nl"
-    os.environ["REPLY_TO"] = "testfrom@domain.nl"
-    os.environ["SMTP_PORT"] = "465"
-    os.environ["SMTP_SRV"] = "smtp.gmail.com"
-    os.environ["SMTP_PWD"] = "boguspassword"
-    os.environ["ADM_EMAIL"] = "admin@domain.nl"
-    os.environ["GROEN_CONTACT"] = "groencontact"
-    os.environ["GROEN_MOBIEL"] = "groenmobiel"
-    os.environ["EMAIL_ON"] = "False"
-    os.environ["CONTACTS_SHEET_ID"] = "SomeContactsSheetID"
-    os.environ["CONTACTS_SHEET_RANGE"] = "2:40"
-    os.environ["SCHEMA_SHEET_ID"] = "SomeSchemaSheetID"
-    os.environ["SCHEMA_SHEET_RANGE"] = "3:27"
+def set_os_environment(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("SMTP_USR", "testuser@domain.nl")
+    monkeypatch.setenv("REPLY_TO", "testfrom@domain.nl")
+    monkeypatch.setenv("SMTP_PORT", "465")
+    monkeypatch.setenv("SMTP_SRV", "smtp.gmail.com")
+    monkeypatch.setenv("SMTP_PWD", "boguspassword")
+    monkeypatch.setenv("ADM_EMAIL", "admin@domain.nl")
+    monkeypatch.setenv("GROEN_CONTACT", "groencontact")
+    monkeypatch.setenv("GROEN_MOBIEL", "groenmobiel")
+    monkeypatch.setenv("EMAIL_ON", "False")
+    monkeypatch.setenv("CONTACTS_SHEET_ID", "SomeContactsSheetID")
+    monkeypatch.setenv("CONTACTS_SHEET_RANGE", "2:40")
+    monkeypatch.setenv("SCHEMA_SHEET_ID", "SomeSchemaSheetID")
+    monkeypatch.setenv("SCHEMA_SHEET_RANGE", "3:27")
 
 
 @pytest.fixture(scope="session")
-def credentials(tmpdir_factory) -> str:
+def credentials(tmpdir_factory: pytest.TempdirFactory) -> str:
     creds = {
         "type": "service_account",
         "project_id": "mail-groene-maaiers",
@@ -78,17 +78,17 @@ def credentials(tmpdir_factory) -> str:
 
 
 @pytest.fixture
-def contacts(notify: gm.Notification, credentials: gm.Credentials):
+def contacts(notify: gm.Notification, credentials: gm.Credentials) -> gm.Contacts:
     return gm.Contacts(credentials=credentials, notification=notify)
 
 
 @pytest.fixture()
-def schedule_sheet(notify: gm.Notification, credentials: gm.Credentials):
+def schedule_sheet(notify: gm.Notification, credentials: gm.Credentials) -> gm.ScheduleSheet:
     return gm.ScheduleSheet(credentials=credentials, notification=notify)
 
 
 @pytest.fixture
-def notification_dict(set_os_environment) -> dict[str, str]:
+def notification_dict(set_os_environment: None) -> dict[str, str]:
     """Return a notification dictionary based on the OS environment variables."""
     return {
         "SMTP_USR": os.environ["SMTP_USR"],
@@ -109,7 +109,7 @@ def notification(notification_dict: dict[str, str]) -> gm.EmailNotification:
     return g
 
 
-def test_extract_contacts_info(contacts: gm.Contacts, expected_contacts: dict[str, gm.Person]):
+def test_extract_contacts_info(contacts: gm.Contacts, expected_contacts: dict[str, gm.Person]) -> None:
     contacts_gmail = [
         ["Name1 LastName1", "name1.lastname1@domain.nl", "adres 1", "other name"],
         ["Name2 LastName2", "name2.lastname2@domain.nl", "adres 5"],
@@ -129,7 +129,7 @@ def test_extract_contacts_info(contacts: gm.Contacts, expected_contacts: dict[st
         ("14-06", [""]),
     ],
 )
-def test_get_sheet_row(test_input: str, expected: list[str], schedule_sheet: gm.ScheduleSheet):
+def test_get_sheet_row(test_input: str, expected: list[str], schedule_sheet: gm.ScheduleSheet) -> None:
     sheet_list = [
         ["Datum", "Activiteit", "", "", "Namen", "Emails"],
         ["", "Grasmaaien + kanten", "Onkruid wieden", "Groot onderhoud*"],
@@ -143,7 +143,7 @@ def test_get_sheet_row(test_input: str, expected: list[str], schedule_sheet: gm.
     assert s == expected
 
 
-def test_names_next_date_date_not_found(schedule_sheet: gm.ScheduleSheet):
+def test_names_next_date_date_not_found(schedule_sheet: gm.ScheduleSheet) -> None:
     sheet_list = [
         ["Datum", "Activiteit", "", "", "Namen", "Emails"],
         ["", "Grasmaaien + kanten", "Onkruid wieden", "Groot onderhoud*"],
@@ -169,7 +169,7 @@ def test_names_next_date_date_not_found(schedule_sheet: gm.ScheduleSheet):
 )
 def test_get_sheet_row_names(
     test_input: list[str], expected: str, schedule_sheet: gm.ScheduleSheet
-):
+) -> None:
     s = schedule_sheet._get_sheet_row_names(test_input)
     assert s == expected
 
@@ -184,7 +184,7 @@ def test_get_sheet_row_names(
         ("Name4, Name5 en Name6 / Name7", ["Name4", "Name5", "Name6", "Name7"]),
     ],
 )
-def test_get_names_list(test_input: str, expected: list[str], schedule_sheet: gm.ScheduleSheet):
+def test_get_names_list(test_input: str, expected: list[str], schedule_sheet: gm.ScheduleSheet) -> None:
     s = schedule_sheet._get_names_list(test_input)
     assert s == expected
 
@@ -211,20 +211,20 @@ def test_find_email_based_on_name_list(
     expected: set[str],
     contacts: gm.Contacts,
     expected_contacts: dict[str, gm.Person],
-):
+) -> None:
     # contacts.contacts_name_email = expected_contacts
     s = contacts._find_email_based_on_name_list(name=test_input, contacts=expected_contacts)
     assert s == expected
 
 
-def test_notifications(notification: gm.Notification, notification_dict: dict[str, str]):
+def test_notifications(notification: gm.Notification, notification_dict: dict[str, str]) -> None:
     # sourcery skip: no-loop-in-tests
     for k in notification_dict:
         g = getattr(notification, k.lower())
         assert g == notification_dict[k]
 
 
-def test_standard_email_message(notification: gm.EmailNotification):
+def test_standard_email_message(notification: gm.EmailNotification) -> None:
     groen_contact = "groencontact"
     groen_mobiel = "groenmobiel"
     names = ["name1", "name2"]
@@ -249,7 +249,7 @@ def test_standard_email_message(notification: gm.EmailNotification):
     assert notification.message.get_content() == body
 
 
-def test_admin_message(notification: gm.EmailNotification):
+def test_admin_message(notification: gm.EmailNotification) -> None:
     subject = "Groen email script issue"
     body = "body"
     notification.admin_message(body)
@@ -259,9 +259,10 @@ def test_admin_message(notification: gm.EmailNotification):
     assert mail_dict["To"] == notification.message["To"]
     assert mail_dict["Subject"] == subject
     assert notification.message.get_content().strip("\n") == body
+    assert "," not in notification.message["To"]
 
 
-def test_generate_message(notification: gm.EmailNotification):
+def test_generate_message(notification: gm.EmailNotification) -> None:
     mail = "to@domain.nl"
     mail_to = {mail}
     subject = "subject"
