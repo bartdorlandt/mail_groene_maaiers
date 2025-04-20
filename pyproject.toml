@@ -1,6 +1,6 @@
 [project]
 name = "mail-groene-maaiers"
-version = "0.2.1"
+version = "0.2.2"
 description = "Using a Gsheet to extract names to send out reminders using email."
 readme = "README.md"
 authors = [{ name = "Bart Dorlandt", email = "bart@bamweb.nl" }]

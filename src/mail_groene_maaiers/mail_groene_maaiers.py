@@ -14,7 +14,7 @@ from google.oauth2.service_account import Credentials
 from googleapiclient import discovery
 from rich import print as pprint
 
-env.read_env(recurse=False)
+env.read_env()
 
 
 class SendMailError(Exception):
@@ -115,7 +115,7 @@ class EmailNotification(Notification):
         """
         subject = "Groen email script issue"
         admin_address = env.str("ADM_EMAIL")
-        self.generate_message(mail_to=set(admin_address), subject=subject, body=body)
+        self.generate_message(mail_to={admin_address}, subject=subject, body=body)
 
     def generate_message(
         self,
