@@ -2,17 +2,19 @@ version: "3"
 
 env:
   TAGS: "all"
-  DOCKER_USER: "bartdorlandt"
-  VERSION: "latest"
+  DOCKER_USER: bartdorlandt
+  VERSION: latest
   REMOTE_PATH: "/Volumes/docker/mail_groene_maaiers"
 
 vars:
   docker_compose_tty: ""
   docker_run_tty: "-it"
-  name: "mail_groene_maaiers"
+  name: mail_groene_maaiers
 
 tasks:
-  default: task --list-all --sort none
+  default:
+    cmd: task -l --sort none
+    silent: true
 
   test:
     desc: "Running python tests"
@@ -59,6 +61,14 @@ tasks:
     cmds:
       - task: docker_clean
       - task: docker_build
+
+  docker:bash:
+    desc: "Exec into the container with bash"
+    cmd: |
+      docker run -it --rm \
+      -v ./.env:/app/.env \
+      -v ./credentials.json:/app/credentials.json --entrypoint bash \
+      "{{.DOCKER_USER}}/{{.name}}":"{{.VERSION}}"
 
   mail:
     desc: "Send the email"

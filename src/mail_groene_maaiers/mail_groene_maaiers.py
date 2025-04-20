@@ -14,7 +14,7 @@ from google.oauth2.service_account import Credentials
 from googleapiclient import discovery
 from rich import print as pprint
 
-env.read_env(recurse=False)
+env.read_env()
 
 
 class SendMailError(Exception):
