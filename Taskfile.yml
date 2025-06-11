@@ -49,6 +49,12 @@ tasks:
     cmds:
       - DOCKER_BUILDKIT=1 docker build --tag "{{.DOCKER_USER}}/{{.name}}":"{{.VERSION}}" .
 
+  docker:build:nocache:
+    desc: "Build the docker image"
+    aliases: [build, Dbuild, docker]
+    cmds:
+      - DOCKER_BUILDKIT=1 docker build --no-cache --tag "{{.DOCKER_USER}}/{{.name}}":"{{.VERSION}}" .
+
   docker:clean:
     desc: "Clean the docker image"
     aliases: [clean_docker, Dclean]
