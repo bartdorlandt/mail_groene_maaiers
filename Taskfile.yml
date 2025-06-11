@@ -51,7 +51,6 @@ tasks:
 
   docker:build:nocache:
     desc: "Build the docker image"
-    aliases: [build, Dbuild, docker]
     cmds:
       - DOCKER_BUILDKIT=1 docker build --no-cache --tag "{{.DOCKER_USER}}/{{.name}}":"{{.VERSION}}" .
 
