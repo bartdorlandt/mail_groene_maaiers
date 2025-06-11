@@ -154,12 +154,12 @@ class EmailNotification(Notification):
         body = (
             f"Beste {', '.join(names)},\n\n"
             "Voor aanstaand weekend sta je aangemeld voor het onderhoud aan de binnentuin.\n"
-            f"Via {env.str('GROEN_CONTACT')} ({env.str('GROEN_MOBIEL')}) kan het "
-            "gereedschap geregeld worden.\n"
+            f"Bij {env.str('GROEN_CONTACT')} kan de sleutel opgehaald worden.\n"
             "Stem het aub tijdig af zodat je niet voor een dichte deur staat.\n\n"
+            "Laad na gebruik de accu's thuis op en leg ze weer vol terug in het schuurtje.\n\n"
             "Mocht het onverhoopt niet door kunnen gaan, regel even iemand anders of "
             "laat het de groencommissie even weten.\n\n"
-            f"Stuur een antwoord naar email: {env.str('REPLY_TO')}\n"
+            f"Groencommissie email: {env.str('REPLY_TO')}\n"
         )
         self.generate_message(mail_to=emails, subject=subject, body=body, bcc=env.str("ADM_EMAIL"))
 
