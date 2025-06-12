@@ -75,11 +75,15 @@ tasks:
       -v ./credentials.json:/app/credentials.json --entrypoint bash \
       "{{.DOCKER_USER}}/{{.name}}":"{{.VERSION}}"
 
-  mail:
+  docker:mail:
     desc: "Send the email"
     silent: true
     cmds:
-      - ./mail.sh
+      - |
+        docker run --rm \
+        -v ./.env:/app/.env \
+        -v ./credentials.json:/app/credentials.json \
+        "{{.DOCKER_USER}}/{{.name}}":"{{.VERSION}}" main.py
 
   sync:
     desc: "Sync the files to the remote system"
