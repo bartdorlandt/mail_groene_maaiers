@@ -36,6 +36,22 @@ type Row = list[str]
 type Emails = set[str]
 type Err = str
 
+email_body = """Beste {names},
+
+Voor aanstaand weekend sta je aangemeld voor het onderhoud aan de binnentuin.
+Bij {groen_contact} kan de sleutel opgehaald worden.
+Stem het aub tijdig af zodat je niet voor een dichte deur staat.
+
+Zorg er aub voor dat:
+* het gereedschap weer schoon en opgeruimd terug in het schuurtje komt.
+* de accu's thuis opgeladen worden en weer vol terug in het schuurtje komen te liggen.
+
+Mocht het onverhoopt niet door kunnen gaan, regel even iemand anders of
+laat het de groencommissie even weten.
+
+Groencommissie email: {reply_to}
+"""
+
 
 def get_next_saturday_datetime() -> str:
     """Generate the upcoming saturday in format "%d-%m".
@@ -151,15 +167,10 @@ class EmailNotification(Notification):
 
         """
         subject = f"Groen onderhoud herinnering voor {get_next_saturday_datetime()}"
-        body = (
-            f"Beste {', '.join(names)},\n\n"
-            "Voor aanstaand weekend sta je aangemeld voor het onderhoud aan de binnentuin.\n"
-            f"Bij {env.str('GROEN_CONTACT')} kan de sleutel opgehaald worden.\n"
-            "Stem het aub tijdig af zodat je niet voor een dichte deur staat.\n\n"
-            "Laad na gebruik de accu's thuis op en leg ze weer vol terug in het schuurtje.\n\n"
-            "Mocht het onverhoopt niet door kunnen gaan, regel even iemand anders of "
-            "laat het de groencommissie even weten.\n\n"
-            f"Groencommissie email: {env.str('REPLY_TO')}\n"
+        body = email_body.format(
+            names=", ".join(names),
+            groen_contact=env.str("GROEN_CONTACT"),
+            reply_to=self.reply_to,
         )
         self.generate_message(mail_to=emails, subject=subject, body=body, bcc=env.str("ADM_EMAIL"))
 

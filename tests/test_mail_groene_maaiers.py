@@ -229,16 +229,7 @@ def test_standard_email_message(notification: gm.EmailNotification) -> None:
     names = ["name1", "name2"]
     emails = {"to@domain.nl", "to2@domain.nl"}
     subject = f"Groen onderhoud herinnering voor {gm.get_next_saturday_datetime()}"
-    body = (
-        f"Beste {', '.join(names)},\n\n"
-        "Voor aanstaand weekend sta je aangemeld voor het onderhoud aan de binnentuin.\n"
-        f"Bij {groen_contact} kan de sleutel opgehaald worden.\n"
-        "Stem het aub tijdig af zodat je niet voor een dichte deur staat.\n\n"
-        "Laad na gebruik de accu's thuis op en leg ze weer vol terug in het schuurtje.\n\n"
-        "Mocht het onverhoopt niet door kunnen gaan, regel even iemand anders of "
-        "laat het de groencommissie even weten.\n\n"
-        f"Groencommissie email: {os.environ['REPLY_TO']}\n"
-    )
+    body = gm.email_body.format(names=", ".join(names), groen_contact=groen_contact, reply_to=os.environ["REPLY_TO"])
     notification.standard_message(names, emails)
     mail_dict = dict(notification.message.items())
 
