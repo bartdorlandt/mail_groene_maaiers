@@ -64,8 +64,8 @@ tasks:
     desc: "Rebuild the docker image"
     aliases: [rebuild, Drebuild]
     cmds:
-      - task: docker_clean
-      - task: docker_build
+      - task: docker:clean
+      - task: docker:build
 
   docker:bash:
     desc: "Exec into the container with bash"

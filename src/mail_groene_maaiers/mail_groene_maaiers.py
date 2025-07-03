@@ -12,7 +12,6 @@ from email.message import EmailMessage
 from environs import env
 from google.oauth2.service_account import Credentials
 from googleapiclient import discovery
-from rich import print as pprint
 
 env.read_env()
 
@@ -39,8 +38,14 @@ type Err = str
 email_body = """Beste {names},
 
 Voor aanstaand weekend sta je aangemeld voor het onderhoud aan de binnentuin.
-Bij {groen_contact} kan de sleutel opgehaald worden.
+Hier kan de sleutel opgehaald worden:
+* {groen_contact1}
+* {groen_contact2}
+
 Stem het aub tijdig af zodat je niet voor een dichte deur staat.
+
+Bekijk wat er gedaan kan worden. Denk aan onkruid wieden, kanten steken, \
+azijn spuiten, maaien, mesten, sproeien (indien je aangesloten bent op de binnentuin)
 
 Zorg er aub voor dat:
 * het gereedschap weer schoon en opgeruimd terug in het schuurtje komt.
@@ -108,7 +113,7 @@ class EmailNotification(Notification):
     def send_message(self) -> None:
         """Send the email."""
         if not self.email_on:
-            pprint(self.message)
+            print(self.message.get_content())
             return
 
         # Create a secure SSL context
@@ -169,7 +174,8 @@ class EmailNotification(Notification):
         subject = f"Groen onderhoud herinnering voor {get_next_saturday_datetime()}"
         body = email_body.format(
             names=", ".join(names),
-            groen_contact=env.str("GROEN_CONTACT"),
+            groen_contact1=env.str("GROEN_CONTACT1"),
+            groen_contact2=env.str("GROEN_CONTACT2"),
             reply_to=self.reply_to,
         )
         self.generate_message(mail_to=emails, subject=subject, body=body, bcc=env.str("ADM_EMAIL"))
@@ -237,7 +243,7 @@ class Contacts(GSheet):
                 extra_namen = ""
                 name, email, _ = line
             else:
-                pprint(f"Could not process line: {line}")
+                print(f"Could not process line: {line}")
                 continue
 
             name_mail_dict[name] = Person(name=name, email=email, extra=extra_namen)
