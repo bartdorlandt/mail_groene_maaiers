@@ -48,7 +48,8 @@ def set_os_environment(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("SMTP_SRV", "smtp.gmail.com")
     monkeypatch.setenv("SMTP_PWD", "boguspassword")
     monkeypatch.setenv("ADM_EMAIL", "admin@domain.nl")
-    monkeypatch.setenv("GROEN_CONTACT", "groencontact")
+    monkeypatch.setenv("GROEN_CONTACT1", "groencontact1")
+    monkeypatch.setenv("GROEN_CONTACT2", "groencontact2")
     monkeypatch.setenv("GROEN_MOBIEL", "groenmobiel")
     monkeypatch.setenv("EMAIL_ON", "False")
     monkeypatch.setenv("CONTACTS_SHEET_ID", "SomeContactsSheetID")
@@ -225,11 +226,12 @@ def test_notifications(notification: gm.Notification, notification_dict: dict[st
 
 
 def test_standard_email_message(notification: gm.EmailNotification) -> None:
-    groen_contact = "groencontact"
+    groen_contact1 = "groencontact1"
+    groen_contact2 = "groencontact2"
     names = ["name1", "name2"]
     emails = {"to@domain.nl", "to2@domain.nl"}
     subject = f"Groen onderhoud herinnering voor {gm.get_next_saturday_datetime()}"
-    body = gm.email_body.format(names=", ".join(names), groen_contact=groen_contact, reply_to=os.environ["REPLY_TO"])
+    body = gm.email_body.format(names=", ".join(names), groen_contact1=groen_contact1, groen_contact2=groen_contact2, reply_to=os.environ["REPLY_TO"])
     notification.standard_message(names, emails)
     mail_dict = dict(notification.message.items())
 
