@@ -47,18 +47,18 @@ tasks:
     desc: "Build the docker image"
     aliases: [build, Dbuild, docker]
     cmds:
-      - DOCKER_BUILDKIT=1 docker build --tag "{{.DOCKER_USER}}/{{.name}}":"{{.VERSION}}" .
+      - DOCKER_BUILDKIT=1 docker build --tag "{{.DOCKER_USER}}/{{.name}}:{{.VERSION}}" .
 
   docker:build:nocache:
     desc: "Build the docker image"
     cmds:
-      - DOCKER_BUILDKIT=1 docker build --no-cache --tag "{{.DOCKER_USER}}/{{.name}}":"{{.VERSION}}" .
+      - DOCKER_BUILDKIT=1 docker build --no-cache --tag "{{.DOCKER_USER}}/{{.name}}:{{.VERSION}}" .
 
   docker:clean:
     desc: "Clean the docker image"
     aliases: [clean_docker, Dclean]
     cmds:
-      - docker rmi "{{.DOCKER_USER}}/{{.name}}":"{{.VERSION}}" --force
+      - docker rmi "{{.DOCKER_USER}}/{{.name}}:{{.VERSION}}" --force
 
   docker:rebuild:
     desc: "Rebuild the docker image"
@@ -73,7 +73,7 @@ tasks:
       docker run -it --rm \
       -v ./.env:/app/.env \
       -v ./credentials.json:/app/credentials.json --entrypoint bash \
-      "{{.DOCKER_USER}}/{{.name}}":"{{.VERSION}}"
+      "{{.DOCKER_USER}}/{{.name}}:{{.VERSION}}"
 
   docker:mail:
     desc: "Send the email"
@@ -83,7 +83,20 @@ tasks:
         docker run --rm \
         -v ./.env:/app/.env \
         -v ./credentials.json:/app/credentials.json \
-        "{{.DOCKER_USER}}/{{.name}}":"{{.VERSION}}" main.py
+        "{{.DOCKER_USER}}/{{.name}}:{{.VERSION}}" main.py
+
+  docker:mail:test:
+    desc: "Send the email"
+    silent: true
+    cmds:
+      - |
+        docker run --rm \
+        -e EMAIL_ON=False \
+        -v ./.env:/app/.env \
+        -v ./credentials.json:/app/credentials.json \
+        -v ./src:/app/src \
+        -v ./main.py:/app/main.py \
+        "{{.DOCKER_USER}}/{{.name}}:{{.VERSION}}" main.py
 
   sync:
     desc: "Sync the files to the remote system"
