@@ -2,6 +2,7 @@
 """Main execution script."""
 
 import os
+import sys
 
 from google.oauth2 import service_account
 
@@ -43,7 +44,9 @@ def main() -> None:
 
     notify.standard_message(names=names, emails=mailing_list)
     notify.send_message()
+    return
 
 
 if __name__ == "__main__":
     main()
+    sys.exit(0)
