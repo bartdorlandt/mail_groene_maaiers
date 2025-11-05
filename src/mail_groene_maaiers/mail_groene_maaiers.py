@@ -321,6 +321,8 @@ class ScheduleSheet(GSheet):
     def _get_sheet_row(self) -> tuple[Row, bool]:
         """Get the desired row within the sheet.
 
+        The lstrip("0") is used to match dates like 05-07 with 5-07.
+
         Returns:
             tuple[ROW, bool]: the row data and a success result.
 
