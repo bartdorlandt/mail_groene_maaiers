@@ -21,6 +21,11 @@ tasks:
     cmds:
       - uv run main.py
 
+  run:test:
+    desc: "Run the application in test mode, without sending emails"
+    cmds:
+      - EMAIL_ON=False uv run main.py
+
   tests:
     desc: "Running python tests"
     cmds:
@@ -56,7 +61,7 @@ tasks:
     desc: "Sync the files to the remote system"
     silent: true
     cmds:
-      - rsync -avz credentials.json main.py mail.sh src Taskfile.yml env.example --exclude '**/__pycache__' "{{.REMOTE_PATH}}"
+      - rsync -avz credentials.json main.py src Taskfile.yml env.example --exclude '**/__pycache__' "{{.REMOTE_PATH}}"
 
   install:nodev:
     desc: "Install the python dependencies"
