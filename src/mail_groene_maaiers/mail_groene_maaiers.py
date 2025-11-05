@@ -35,12 +35,15 @@ type Row = list[str]
 type Emails = set[str]
 type Err = str
 
-email_body = """Beste {names},
+
+def email_body(names: list[str], groen_contacts: list[str], reply_to: str) -> str:
+    """Generate the email body."""
+    contacts = [f"* {contact.strip()}" for contact in groen_contacts]
+    return f"""Beste {", ".join(names)},
 
 Voor aanstaand weekend sta je aangemeld voor het onderhoud aan de binnentuin.
 Hier kan de sleutel opgehaald worden:
-* {groen_contact1}
-* {groen_contact2}
+{"\n".join(contacts)}
 
 Stem het aub tijdig af zodat je niet voor een dichte deur staat.
 
@@ -51,7 +54,7 @@ Zorg er aub voor dat:
 * het gereedschap weer schoon en opgeruimd terug in het schuurtje komt.
 * de accu's thuis opgeladen worden en weer vol terug in het schuurtje komen te liggen.
 
-Mocht het onverhoopt niet door kunnen gaan, regel even iemand anders of
+Mocht het onverhoopt niet door kunnen gaan, regel even iemand anders of \
 laat het de groencommissie even weten.
 
 Groencommissie email: {reply_to}
@@ -172,10 +175,10 @@ class EmailNotification(Notification):
 
         """
         subject = f"Groen onderhoud herinnering voor {get_next_saturday_datetime()}"
-        body = email_body.format(
-            names=", ".join(names),
-            groen_contact1=env.str("GROEN_CONTACT1"),
-            groen_contact2=env.str("GROEN_CONTACT2"),
+        groen_contacts = env.str("GROEN_CONTACTS").split(",")
+        body = email_body(
+            names=names,
+            groen_contacts=groen_contacts,
             reply_to=self.reply_to,
         )
         self.generate_message(mail_to=emails, subject=subject, body=body, bcc=env.str("ADM_EMAIL"))
@@ -323,7 +326,11 @@ class ScheduleSheet(GSheet):
 
         """
         return next(
-            ((line, True) for line in self.sheet if line[0] == self.short_date),
+            (
+                (line, True)
+                for line in self.sheet
+                if line[0].lstrip("0") == self.short_date.lstrip("0")
+            ),
             ([""], False),
         )
 

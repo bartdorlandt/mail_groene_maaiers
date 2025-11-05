@@ -48,9 +48,7 @@ def set_os_environment(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("SMTP_SRV", "smtp.gmail.com")
     monkeypatch.setenv("SMTP_PWD", "boguspassword")
     monkeypatch.setenv("ADM_EMAIL", "admin@domain.nl")
-    monkeypatch.setenv("GROEN_CONTACT1", "groencontact1")
-    monkeypatch.setenv("GROEN_CONTACT2", "groencontact2")
-    monkeypatch.setenv("GROEN_MOBIEL", "groenmobiel")
+    monkeypatch.setenv("GROEN_CONTACTS", "groencontact1, groencontact2")
     monkeypatch.setenv("EMAIL_ON", "False")
     monkeypatch.setenv("CONTACTS_SHEET_ID", "SomeContactsSheetID")
     monkeypatch.setenv("CONTACTS_SHEET_RANGE", "2:40")
@@ -225,13 +223,42 @@ def test_notifications(notification: gm.Notification, notification_dict: dict[st
         assert g == notification_dict[k]
 
 
+def test_email_body() -> None:
+    names = ["name1", "name2"]
+    groen_contacts = ["groen contact1", "groen contact2","groen contact3"]
+    reply_to = "me@example.com"
+    body = gm.email_body(names=names, groen_contacts=groen_contacts, reply_to=reply_to)
+
+    expected_body = f"""Beste {", ".join(names)},
+
+Voor aanstaand weekend sta je aangemeld voor het onderhoud aan de binnentuin.
+Hier kan de sleutel opgehaald worden:
+* groen contact1
+* groen contact2
+* groen contact3
+
+Stem het aub tijdig af zodat je niet voor een dichte deur staat.
+
+Bekijk wat er gedaan kan worden. Denk aan onkruid wieden, kanten steken, \
+azijn spuiten, maaien, mesten, sproeien (indien je aangesloten bent op de binnentuin)
+
+Zorg er aub voor dat:
+* het gereedschap weer schoon en opgeruimd terug in het schuurtje komt.
+* de accu's thuis opgeladen worden en weer vol terug in het schuurtje komen te liggen.
+
+Mocht het onverhoopt niet door kunnen gaan, regel even iemand anders of \
+laat het de groencommissie even weten.
+
+Groencommissie email: {reply_to}
+"""
+    assert body == expected_body
+
 def test_standard_email_message(notification: gm.EmailNotification) -> None:
-    groen_contact1 = "groencontact1"
-    groen_contact2 = "groencontact2"
+    groen_contacts = os.getenv("GROEN_CONTACTS", "").split(",")
     names = ["name1", "name2"]
     emails = {"to@domain.nl", "to2@domain.nl"}
     subject = f"Groen onderhoud herinnering voor {gm.get_next_saturday_datetime()}"
-    body = gm.email_body.format(names=", ".join(names), groen_contact1=groen_contact1, groen_contact2=groen_contact2, reply_to=os.environ["REPLY_TO"])
+    body = gm.email_body(names=names, groen_contacts=groen_contacts, reply_to=os.environ["REPLY_TO"])
     notification.standard_message(names, emails)
     mail_dict = dict(notification.message.items())
 
