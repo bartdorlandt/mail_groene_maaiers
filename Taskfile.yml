@@ -86,7 +86,7 @@ tasks:
         "{{.DOCKER_USER}}/{{.name}}:{{.VERSION}}" main.py
 
   docker:mail:test:
-    desc: "Send the email"
+    desc: "Pretend to send the email (dry run)"
     silent: true
     cmds:
       - |

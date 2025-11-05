@@ -1,5 +1,5 @@
 version = 1
-revision = 2
+revision = 3
 requires-python = ">=3.12"
 resolution-markers = [
     "python_full_version >= '3.13'",
@@ -226,8 +226,8 @@ wheels = [
 
 [[package]]
 name = "mail-groene-maaiers"
-version = "0.2.3"
-source = { editable = "." }
+version = "0.2.4"
+source = { virtual = "." }
 dependencies = [
     { name = "environs" },
     { name = "google-api-python-client" },

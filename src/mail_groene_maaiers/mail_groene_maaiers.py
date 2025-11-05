@@ -35,12 +35,15 @@ type Row = list[str]
 type Emails = set[str]
 type Err = str
 
-email_body = """Beste {names},
+
+def email_body(names: list[str], groen_contacts: list[str], reply_to: str) -> str:
+    """Generate the email body."""
+    contacts = [f"* {contact.strip()}" for contact in groen_contacts]
+    return f"""Beste {", ".join(names)},
 
 Voor aanstaand weekend sta je aangemeld voor het onderhoud aan de binnentuin.
 Hier kan de sleutel opgehaald worden:
-* {groen_contact1}
-* {groen_contact2}
+{"\n".join(contacts)}
 
 Stem het aub tijdig af zodat je niet voor een dichte deur staat.
 
@@ -172,10 +175,10 @@ class EmailNotification(Notification):
 
         """
         subject = f"Groen onderhoud herinnering voor {get_next_saturday_datetime()}"
-        body = email_body.format(
-            names=", ".join(names),
-            groen_contact1=env.str("GROEN_CONTACT1"),
-            groen_contact2=env.str("GROEN_CONTACT2"),
+        groen_contacts = env.str("GROEN_CONTACTS").split(",")
+        body = email_body(
+            names=names,
+            groen_contacts=groen_contacts,
             reply_to=self.reply_to,
         )
         self.generate_message(mail_to=emails, subject=subject, body=body, bcc=env.str("ADM_EMAIL"))
