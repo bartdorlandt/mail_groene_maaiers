@@ -61,7 +61,8 @@ tasks:
     desc: "Sync the files to the remote system"
     silent: true
     cmds:
-      - rsync -avz credentials.json main.py src Taskfile.yml env.example --exclude '**/__pycache__' "{{.REMOTE_PATH}}"
+      - rsync -avz .python-version credentials.json env.example main.py pyproject.toml src Taskfile.yml uv.lock --exclude '**/__pycache__' "{{.REMOTE_PATH}}"
+      #
 
   install:nodev:
     desc: "Install the python dependencies"
