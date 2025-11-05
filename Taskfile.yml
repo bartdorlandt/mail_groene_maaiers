@@ -62,18 +62,6 @@ tasks:
     silent: true
     cmds:
       - rsync -avz .python-version credentials.json env.example main.py pyproject.toml src Taskfile.yml uv.lock --exclude '**/__pycache__' "{{.REMOTE_PATH}}"
-      #
-
-  install:nodev:
-    desc: "Install the python dependencies"
-    aliases: [install]
-    cmds:
-      - uv sync --no-dev
-
-  install:
-    desc: "Install the python dependencies"
-    cmds:
-      - uv sync
 
   clean:
     desc: "Clean up the files and dirs"
