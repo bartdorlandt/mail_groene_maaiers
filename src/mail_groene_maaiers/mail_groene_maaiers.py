@@ -54,7 +54,7 @@ Zorg er aub voor dat:
 * het gereedschap weer schoon en opgeruimd terug in het schuurtje komt.
 * de accu's thuis opgeladen worden en weer vol terug in het schuurtje komen te liggen.
 
-Mocht het onverhoopt niet door kunnen gaan, regel even iemand anders of
+Mocht het onverhoopt niet door kunnen gaan, regel even iemand anders of \
 laat het de groencommissie even weten.
 
 Groencommissie email: {reply_to}
@@ -326,7 +326,11 @@ class ScheduleSheet(GSheet):
 
         """
         return next(
-            ((line, True) for line in self.sheet if line[0] == self.short_date),
+            (
+                (line, True)
+                for line in self.sheet
+                if line[0].lstrip("0") == self.short_date.lstrip("0")
+            ),
             ([""], False),
         )
 

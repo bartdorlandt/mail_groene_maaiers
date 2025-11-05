@@ -31,4 +31,4 @@ jobs:
 
       - name: Run tests
         shell: bash
-        run: task test
+        run: task tests

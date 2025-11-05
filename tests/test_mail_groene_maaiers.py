@@ -246,7 +246,7 @@ Zorg er aub voor dat:
 * het gereedschap weer schoon en opgeruimd terug in het schuurtje komt.
 * de accu's thuis opgeladen worden en weer vol terug in het schuurtje komen te liggen.
 
-Mocht het onverhoopt niet door kunnen gaan, regel even iemand anders of
+Mocht het onverhoopt niet door kunnen gaan, regel even iemand anders of \
 laat het de groencommissie even weten.
 
 Groencommissie email: {reply_to}

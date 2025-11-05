@@ -16,28 +16,28 @@ tasks:
     cmd: task -l --sort none
     silent: true
 
-  test:
+  tests:
     desc: "Running python tests"
-    deps: [pytest, mypy, ruff]
+    deps: [test:pytest, test:mypy, test:ruff]
 
-  python_fix:
+  format:fix:
     desc: "Run python formatters"
     aliases: [fix]
     cmds:
       - uv run ruff check . --fix
       - uv run ruff format . -v
 
-  pytest:
+  test:pytest:
     desc: "Run pytest"
     cmds:
-      - uv run pytest -v
+      - uv run pytest -v {{.CLI_ARGS}}
 
-  mypy:
+  test:mypy:
     desc: "Run mypy"
     cmds:
       - uv run mypy . --junit-xml mypy_report.xml --enable-incomplete-feature=NewGenericSyntax
 
-  ruff:
+  test:ruff:
     desc: "Run ruff"
     cmds:
       - uv run ruff check .
