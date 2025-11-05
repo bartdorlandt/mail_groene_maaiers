@@ -13,90 +13,44 @@ vars:
 
 tasks:
   default:
-    cmd: task -l --sort none
+    cmd: task -l
     silent: true
+
+  run:
+    desc: "Run the application"
+    cmds:
+      - uv run main.py
 
   tests:
     desc: "Running python tests"
-    deps: [test:pytest, test:mypy, test:ruff]
+    cmds:
+      - task: test:ruff
+      - task: test:typing
+      - task: test:pytest
 
   format:fix:
     desc: "Run python formatters"
     aliases: [fix]
     cmds:
-      - uv run ruff check . --fix
       - uv run ruff format . -v
+      - uv run ruff check . --fix
 
   test:pytest:
     desc: "Run pytest"
     cmds:
       - uv run pytest -v {{.CLI_ARGS}}
 
-  test:mypy:
-    desc: "Run mypy"
+  test:typing:
+    desc: "Run static type checker"
     cmds:
-      - uv run mypy . --junit-xml mypy_report.xml --enable-incomplete-feature=NewGenericSyntax
+      - uv run pyrefly check
+      # --enable-incomplete-feature=NewGenericSyntax  # enabled by default in 3.14
 
   test:ruff:
     desc: "Run ruff"
     cmds:
       - uv run ruff check .
       - uv run ruff format --diff .
-
-  docker:build:
-    desc: "Build the docker image"
-    aliases: [build, Dbuild, docker]
-    cmds:
-      - DOCKER_BUILDKIT=1 docker build --tag "{{.DOCKER_USER}}/{{.name}}:{{.VERSION}}" .
-
-  docker:build:nocache:
-    desc: "Build the docker image"
-    cmds:
-      - DOCKER_BUILDKIT=1 docker build --no-cache --tag "{{.DOCKER_USER}}/{{.name}}:{{.VERSION}}" .
-
-  docker:clean:
-    desc: "Clean the docker image"
-    aliases: [clean_docker, Dclean]
-    cmds:
-      - docker rmi "{{.DOCKER_USER}}/{{.name}}:{{.VERSION}}" --force
-
-  docker:rebuild:
-    desc: "Rebuild the docker image"
-    aliases: [rebuild, Drebuild]
-    cmds:
-      - task: docker:clean
-      - task: docker:build
-
-  docker:bash:
-    desc: "Exec into the container with bash"
-    cmd: |
-      docker run -it --rm \
-      -v ./.env:/app/.env \
-      -v ./credentials.json:/app/credentials.json --entrypoint bash \
-      "{{.DOCKER_USER}}/{{.name}}:{{.VERSION}}"
-
-  docker:mail:
-    desc: "Send the email"
-    silent: true
-    cmds:
-      - |
-        docker run --rm \
-        -v ./.env:/app/.env \
-        -v ./credentials.json:/app/credentials.json \
-        "{{.DOCKER_USER}}/{{.name}}:{{.VERSION}}" main.py
-
-  docker:mail:test:
-    desc: "Pretend to send the email (dry run)"
-    silent: true
-    cmds:
-      - |
-        docker run --rm \
-        -e EMAIL_ON=False \
-        -v ./.env:/app/.env \
-        -v ./credentials.json:/app/credentials.json \
-        -v ./src:/app/src \
-        -v ./main.py:/app/main.py \
-        "{{.DOCKER_USER}}/{{.name}}:{{.VERSION}}" main.py
 
   sync:
     desc: "Sync the files to the remote system"
@@ -108,20 +62,18 @@ tasks:
     desc: "Install the python dependencies"
     aliases: [install]
     cmds:
-      - uv venv
       - uv sync --no-dev
 
-  install:dev:
+  install:
     desc: "Install the python dependencies"
     cmds:
-      - uv venv
       - uv sync
 
   clean:
     desc: "Clean up the files and dirs"
     silent: true
     cmds:
-      - rm -rf .venv .nox .ruff_cache .pytest_cache .mypy_cache .coverage htmlcov __pycache__ coverage.xml pytest_report.xml mypy_report.xml dist
+      - rm -rf .venv .nox .ruff_cache .pytest_cache .coverage htmlcov __pycache__ coverage.xml pytest_report.xml dist
 
   act:checks:
     desc: "Run checks with act, to test github actions"

@@ -4,7 +4,7 @@ version = "0.2.4"
 description = "Using a Gsheet to extract names to send out reminders using email."
 readme = "README.md"
 authors = [{ name = "Bart Dorlandt", email = "bart@bamweb.nl" }]
-requires-python = ">=3.12"
+requires-python = ">=3.14"
 dependencies = [
     "environs>=14.1.1",
     "google-api-python-client>=2.142.0",
@@ -19,11 +19,11 @@ dependencies = [
 # packages = ["src/mail_groene_maaiers"]
 
 [dependency-groups]
-dev = ["pytest>=8.3.2", "pytest-cov>=5.0.0", "mypy>=1.11.1", "ruff>=0.6.1"]
+dev = ["pyrefly", "pytest", "pytest-cov", "ruff"]
 
-[tool.mypy]
-python_version = "3.12"
-ignore_missing_imports = true
+# [tool.mypy]
+# python_version = "3.14"
+# ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 filterwarnings = [
@@ -38,7 +38,7 @@ source = ["."]
 
 [tool.ruff]
 line-length = 100
-target-version = "py312"
+target-version = "py314"
 extend-exclude = [
     ".git",
     "__pycache__",
@@ -74,6 +74,10 @@ extend-select = [
     # flake8-bandit
     "S",
 ]
+
+[tool.pyrefly]
+python-version = "3.14"
+ignore-missing-imports = ["*"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"

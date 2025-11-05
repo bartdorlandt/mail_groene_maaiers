@@ -1,6 +1,8 @@
 """pytest groene_maaiers."""
+
 import json
 import os
+from pathlib import Path
 
 import pytest
 
@@ -71,7 +73,7 @@ def credentials(tmpdir_factory: pytest.TempdirFactory) -> str:
         "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/"
         "some.iam.gserviceaccount.com",
     }
-    fp = tmpdir_factory.mktemp("data").join("creds.json")
+    fp = tmpdir_factory.mktemp("data").join(Path("creds.json"))
     fp.write(json.dumps(creds))
     return fp.strpath
 
@@ -82,7 +84,9 @@ def contacts(notify: gm.Notification, credentials: gm.Credentials) -> gm.Contact
 
 
 @pytest.fixture()
-def schedule_sheet(notify: gm.Notification, credentials: gm.Credentials) -> gm.ScheduleSheet:
+def schedule_sheet(
+    notify: gm.Notification, credentials: gm.Credentials
+) -> gm.ScheduleSheet:
     return gm.ScheduleSheet(credentials=credentials, notification=notify)
 
 
@@ -108,7 +112,9 @@ def notification(notification_dict: dict[str, str]) -> gm.EmailNotification:
     return g
 
 
-def test_extract_contacts_info(contacts: gm.Contacts, expected_contacts: dict[str, gm.Person]) -> None:
+def test_extract_contacts_info(
+    contacts: gm.Contacts, expected_contacts: dict[str, gm.Person]
+) -> None:
     contacts_gmail = [
         ["Name1 LastName1", "name1.lastname1@domain.nl", "adres 1", "other name"],
         ["Name2 LastName2", "name2.lastname2@domain.nl", "adres 5"],
@@ -128,7 +134,9 @@ def test_extract_contacts_info(contacts: gm.Contacts, expected_contacts: dict[st
         ("14-06", [""]),
     ],
 )
-def test_get_sheet_row(test_input: str, expected: list[str], schedule_sheet: gm.ScheduleSheet) -> None:
+def test_get_sheet_row(
+    test_input: str, expected: list[str], schedule_sheet: gm.ScheduleSheet
+) -> None:
     sheet_list = [
         ["Datum", "Activiteit", "", "", "Namen", "Emails"],
         ["", "Grasmaaien + kanten", "Onkruid wieden", "Groot onderhoud*"],
@@ -183,7 +191,9 @@ def test_get_sheet_row_names(
         ("Name4, Name5 en Name6 / Name7", ["Name4", "Name5", "Name6", "Name7"]),
     ],
 )
-def test_get_names_list(test_input: str, expected: list[str], schedule_sheet: gm.ScheduleSheet) -> None:
+def test_get_names_list(
+    test_input: str, expected: list[str], schedule_sheet: gm.ScheduleSheet
+) -> None:
     s = schedule_sheet._get_names_list(test_input)
     assert s == expected
 
@@ -212,11 +222,15 @@ def test_find_email_based_on_name_list(
     expected_contacts: dict[str, gm.Person],
 ) -> None:
     # contacts.contacts_name_email = expected_contacts
-    s = contacts._find_email_based_on_name_list(name=test_input, contacts=expected_contacts)
+    s = contacts._find_email_based_on_name_list(
+        name=test_input, contacts=expected_contacts
+    )
     assert s == expected
 
 
-def test_notifications(notification: gm.Notification, notification_dict: dict[str, str]) -> None:
+def test_notifications(
+    notification: gm.Notification, notification_dict: dict[str, str]
+) -> None:
     # sourcery skip: no-loop-in-tests
     for k in notification_dict:
         g = getattr(notification, k.lower())
@@ -225,7 +239,7 @@ def test_notifications(notification: gm.Notification, notification_dict: dict[st
 
 def test_email_body() -> None:
     names = ["name1", "name2"]
-    groen_contacts = ["groen contact1", "groen contact2","groen contact3"]
+    groen_contacts = ["groen contact1", "groen contact2", "groen contact3"]
     reply_to = "me@example.com"
     body = gm.email_body(names=names, groen_contacts=groen_contacts, reply_to=reply_to)
 
@@ -253,12 +267,15 @@ Groencommissie email: {reply_to}
 """
     assert body == expected_body
 
+
 def test_standard_email_message(notification: gm.EmailNotification) -> None:
     groen_contacts = os.getenv("GROEN_CONTACTS", "").split(",")
     names = ["name1", "name2"]
     emails = {"to@domain.nl", "to2@domain.nl"}
     subject = f"Groen onderhoud herinnering voor {gm.get_next_saturday_datetime()}"
-    body = gm.email_body(names=names, groen_contacts=groen_contacts, reply_to=os.environ["REPLY_TO"])
+    body = gm.email_body(
+        names=names, groen_contacts=groen_contacts, reply_to=os.environ["REPLY_TO"]
+    )
     notification.standard_message(names, emails)
     mail_dict = dict(notification.message.items())
 
