@@ -157,6 +157,7 @@ def test_names_next_date_date_not_found(schedule_sheet: gm.ScheduleSheet) -> Non
         ["29-05", "x", "  ", "", "2 bewoners", "Name4, Name5 "],
         ["05-06", "x", "x", "", "2 bewoners", "Name6 en Name7"],
         ["12-06", "x", "", "", "2 bewoners"],
+        [],
     ]
     date = "14-06"
     schedule_sheet.sheet = sheet_list

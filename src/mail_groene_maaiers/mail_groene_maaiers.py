@@ -331,7 +331,7 @@ class ScheduleSheet(GSheet):
             (
                 (line, True)
                 for line in self.sheet
-                if line[0].lstrip("0") == self.short_date.lstrip("0")
+                if line and line[0].lstrip("0") == self.short_date.lstrip("0")
             ),
             ([""], False),
         )
