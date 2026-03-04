@@ -190,6 +190,9 @@ def test_get_sheet_row_names(
         ("Name4. Name5 ", ["Name4", "Name5"]),
         ("Name1., Name2, Name3", ["Name1", "Name2", "Name3"]),
         ("Name4, Name5 en Name6 / Name7", ["Name4", "Name5", "Name6", "Name7"]),
+        ("Name1 L & zn, Name2, Name3", ["Name1 L & zn", "Name2", "Name3"]),
+        ("Name c , Name2 ", ["Name c", "Name2"]),
+        ("Name1 en Name2, Name3", ["Name1", "Name2", "Name3"]),
     ],
 )
 def test_get_names_list(
