@@ -130,6 +130,7 @@ mypy_report.xml
 # editor
 .idea/
 .vscode/
+.zed/
 
 # Pyre type checker
 .pyre/

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Groene maaiers script for sending emails to enlisted users on a Gsheet."""
 
+import logging
 import re
 import smtplib
 import ssl
@@ -14,6 +15,9 @@ from google.oauth2.service_account import Credentials
 from googleapiclient import discovery
 
 env.read_env()
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+logger = logging.getLogger(__name__)
 
 
 class SendMailError(Exception):
@@ -127,7 +131,9 @@ class EmailNotification(Notification):
                 server.ehlo()  # Can be omitted
                 server.login(self.smtp_usr, self.smtp_pwd)
                 server.send_message(self.message)
+                logger.info("Email sent to %s", self.message["To"])
         except smtplib.SMTPException as err:
+            logger.error("Failed to send email to %s: %s", self.message["To"], err)
             raise SendMailError from err
 
     def admin_message(self, body: str) -> None:
