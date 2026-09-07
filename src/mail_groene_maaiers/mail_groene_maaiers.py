@@ -7,7 +7,7 @@ import smtplib
 import ssl
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from datetime import date, timedelta
+from datetime import datetime, timedelta, timezone
 from email.message import EmailMessage
 
 from environs import env
@@ -18,6 +18,7 @@ env.read_env()
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
+NOW = datetime.now(tz=timezone(timedelta(hours=2)))
 
 
 class SendMailError(Exception):
@@ -72,7 +73,7 @@ def get_next_saturday_datetime() -> str:
         str: format "%d-%m" for the saturday to come
 
     """
-    today = date.today()
+    today = NOW.date()
     saturday = today + timedelta((5 - today.weekday()) % 7)
     return saturday.strftime("%d-%m")
 
@@ -217,7 +218,7 @@ class GSheet:  # pylint: disable=too-few-public-methods
             credentials=self.credentials,
             num_retries=3,
         )
-        sheet = service.spreadsheets()  # pylint: disable=no-member
+        sheet = service.spreadsheets()  # type: ignore  # pylint: disable=no-member
         values = sheet.values()
         spreadsheet = values.get(spreadsheetId=self.sheet_id, range=self.sheet_range)
         result = spreadsheet.execute()
@@ -319,7 +320,7 @@ class ScheduleSheet(GSheet):
 
         """
         self.sheet_id = env.str("SCHEMA_SHEET_ID")
-        self.sheet_range = f"{date.today().year}!{env.str('SCHEMA_SHEET_RANGE')}"
+        self.sheet_range = f"{NOW.year}!{env.str('SCHEMA_SHEET_RANGE')}"
         self.short_date = get_next_saturday_datetime()
         self.date_not_found = False
         super().__init__(credentials, notification)
